@@ -152,18 +152,16 @@ export default function DashboardClient({
   for (const m of websocketMessages) {
     allMessagesMap.set(m.id, m);
   }
-  const renderedMessages = Array.from(allMessagesMap.values()).sort(
-    (a, b) => a.id.localeCompare(b.id) // Fallback sorting, standard timestamp order
-  );
+  const renderedMessages = Array.from(allMessagesMap.values());
 
   // Resolve friend request relation for active DMs
   const friendRelation =
     activeRoomType === "friend"
-      ? friends.find(
-          (f) =>
-            (f.userId === currentUser.id && f.friendId === activeRoomId) ||
-            (f.userId === activeRoomId && f.friendId === currentUser.id)
-        ) || null
+      ? friends.find((f) => {
+          const friendId = f.userId === currentUser.id ? f.friendId : f.userId;
+          const dmId = `dm-${[currentUser.id, friendId].sort().join("-")}`;
+          return dmId === activeRoomId;
+        }) || null
       : null;
 
   // Mutations using TanStack Query
@@ -299,7 +297,11 @@ export default function DashboardClient({
     setWebsocketMessages((prev) => [...prev, payload]);
 
     // 3. Save to Neon Serverless
-    actionSaveMessage(msgId, activeRoomId, currentUser.name, messageInput.trim());
+    actionSaveMessage(msgId, activeRoomId, currentUser.name, messageInput.trim()).then((res) => {
+      if (!res.success) {
+        toast.error(res.error || "Failed to save message to database");
+      }
+    });
 
     // 4. Reset
     setMessageInput("");
@@ -368,9 +370,9 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans relative">
+    <div className="flex h-screen bg-background text-slate-900 overflow-hidden font-sans relative">
       {/* Decorative Blur Backgrounds */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/5 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-sky-500/5 rounded-full blur-[100px] pointer-events-none"></div>
 
       <Sidebar
@@ -441,9 +443,9 @@ export default function DashboardClient({
 // Inline fallback loader UI for Suspense transitions
 export function DashboardLoading() {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-slate-50 text-slate-500">
+    <div className="flex h-screen w-full items-center justify-center bg-background text-slate-500">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
         <p className="text-sm font-semibold tracking-wider uppercase text-slate-400">
           Syncing PatChat session...
         </p>

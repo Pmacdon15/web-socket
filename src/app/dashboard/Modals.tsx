@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { actionSearchUsers, actionSearchRooms } from "@/app/actions/chat";
-import type { User, Room } from "@/types/chat";
+import Image from "next/image";
+import type React from "react";
+import { useState } from "react";
+import { actionSearchRooms, actionSearchUsers } from "@/app/actions/chat";
+import type { Room, User } from "@/types/chat";
 
 interface AddFriendModalProps {
   isOpen: boolean;
@@ -12,7 +14,12 @@ interface AddFriendModalProps {
   isPending: boolean;
 }
 
-export function AddFriendModal({ isOpen, onClose, onSubmit, isPending }: AddFriendModalProps) {
+export function AddFriendModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isPending,
+}: AddFriendModalProps) {
   const [query, setQuery] = useState("");
 
   // TanStack Query for searching users
@@ -43,9 +50,13 @@ export function AddFriendModal({ isOpen, onClose, onSubmit, isPending }: AddFrie
   };
 
   return (
-    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white max-w-sm w-full p-6 rounded-2xl border border-slate-200 shadow-xl relative space-y-4 animate-float" style={{ animationIterationCount: 1, animationDuration: "0.3s" }}>
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div
+        className="bg-white max-w-sm w-full p-6 rounded-2xl border border-slate-200 shadow-xl relative space-y-4 animate-float"
+        style={{ animationIterationCount: 1, animationDuration: "0.3s" }}
+      >
         <button
+          type="button"
           onClick={onClose}
           disabled={isPending}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 disabled:opacity-50 cursor-pointer"
@@ -54,9 +65,9 @@ export function AddFriendModal({ isOpen, onClose, onSubmit, isPending }: AddFrie
         </button>
         <h3 className="text-lg font-bold text-slate-800">Add Friend</h3>
         <p className="text-xs text-slate-500">
-          Search by name or enter a user ID. Clicking a matching user from the autocomplete dropdown will instantly send a request.
+          Search for friends by name or ID.
         </p>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4 relative">
           <div className="relative">
             <input
@@ -72,27 +83,35 @@ export function AddFriendModal({ isOpen, onClose, onSubmit, isPending }: AddFrie
 
             {/* Autocomplete Dropdown */}
             {query.trim().length >= 2 && (
-              <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-lg z-50 divide-y divide-slate-100 custom-scrollbar">
+              <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-100 rounded-xl shadow-lg z-50 divide-y divide-slate-50 custom-scrollbar">
                 {isLoading ? (
-                  <div className="p-3 text-xs text-slate-400 text-center">Searching users...</div>
+                  <div className="p-3 text-xs text-slate-400 text-center">
+                    Searching users...
+                  </div>
                 ) : autocompleteUsers.length === 0 ? (
-                  <div className="p-3 text-xs text-slate-400 text-center">No matching users found</div>
+                  <div className="p-3 text-xs text-slate-400 text-center">
+                    No matching users found
+                  </div>
                 ) : (
                   autocompleteUsers.map((user) => (
                     <button
                       key={user.id}
                       type="button"
                       onClick={() => handleSelectUser(user.id)}
-                      className="w-full p-2.5 flex items-center gap-3 text-left hover:bg-slate-50 transition-colors cursor-pointer"
+                      className="w-full p-2.5 flex items-center gap-3 text-left hover:bg-sky-50/50 transition-colors cursor-pointer"
                     >
-                      <img
+                      <Image
                         src={user.avatar}
                         alt={user.name}
                         className="w-7 h-7 rounded-full bg-slate-100 object-cover"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-700 truncate">{user.name}</p>
-                        <p className="text-[9px] text-slate-400 font-mono truncate">{user.id}</p>
+                        <p className="text-xs font-semibold text-slate-700 truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-[9px] text-slate-400 font-mono truncate">
+                          {user.id}
+                        </p>
                       </div>
                     </button>
                   ))
@@ -113,7 +132,7 @@ export function AddFriendModal({ isOpen, onClose, onSubmit, isPending }: AddFrie
             <button
               type="submit"
               disabled={isPending || !query.trim()}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 font-semibold text-white disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 font-semibold text-white disabled:opacity-50 cursor-pointer"
             >
               {isPending ? "Adding..." : "Add Friend"}
             </button>
@@ -131,7 +150,12 @@ interface CreateRoomModalProps {
   isPending: boolean;
 }
 
-export function CreateRoomModal({ isOpen, onClose, onSubmit, isPending }: CreateRoomModalProps) {
+export function CreateRoomModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isPending,
+}: CreateRoomModalProps) {
   const [roomName, setRoomName] = useState("");
 
   if (!isOpen) return null;
@@ -144,9 +168,10 @@ export function CreateRoomModal({ isOpen, onClose, onSubmit, isPending }: Create
   };
 
   return (
-    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
       <div className="bg-white max-w-sm w-full p-6 rounded-2xl border border-slate-200 shadow-xl relative space-y-4">
         <button
+          type="button"
           onClick={onClose}
           disabled={isPending}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 disabled:opacity-50 cursor-pointer"
@@ -154,9 +179,7 @@ export function CreateRoomModal({ isOpen, onClose, onSubmit, isPending }: Create
           ✕
         </button>
         <h3 className="text-lg font-bold text-slate-800">Create Chat Room</h3>
-        <p className="text-xs text-slate-500">
-          Create a new public group channel where users can join and message each other.
-        </p>
+        <p className="text-xs text-slate-500">Create a new chat room.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -180,7 +203,7 @@ export function CreateRoomModal({ isOpen, onClose, onSubmit, isPending }: Create
             <button
               type="submit"
               disabled={isPending || !roomName.trim()}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 font-semibold text-white disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 font-semibold text-white disabled:opacity-50 cursor-pointer"
             >
               {isPending ? "Creating..." : "Create Room"}
             </button>
@@ -198,7 +221,12 @@ interface JoinRoomModalProps {
   isPending: boolean;
 }
 
-export function JoinRoomModal({ isOpen, onClose, onSubmit, isPending }: JoinRoomModalProps) {
+export function JoinRoomModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isPending,
+}: JoinRoomModalProps) {
   const [query, setQuery] = useState("");
 
   // TanStack Query for searching group rooms
@@ -229,9 +257,10 @@ export function JoinRoomModal({ isOpen, onClose, onSubmit, isPending }: JoinRoom
   };
 
   return (
-    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
       <div className="bg-white max-w-sm w-full p-6 rounded-2xl border border-slate-200 shadow-xl relative space-y-4">
         <button
+          type="button"
           onClick={onClose}
           disabled={isPending}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 disabled:opacity-50 cursor-pointer"
@@ -240,7 +269,7 @@ export function JoinRoomModal({ isOpen, onClose, onSubmit, isPending }: JoinRoom
         </button>
         <h3 className="text-lg font-bold text-slate-800">Join Existing Room</h3>
         <p className="text-xs text-slate-500">
-          Search by name or enter a Room ID. Clicking a matching room from the autocomplete dropdown will instantly subscribe you.
+          Search for rooms by name or ID.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4 relative">
           <div className="relative">
@@ -257,21 +286,29 @@ export function JoinRoomModal({ isOpen, onClose, onSubmit, isPending }: JoinRoom
 
             {/* Autocomplete Dropdown */}
             {query.trim().length >= 2 && (
-              <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-lg z-50 divide-y divide-slate-100 custom-scrollbar">
+              <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-100 rounded-xl shadow-lg z-50 divide-y divide-slate-50 custom-scrollbar">
                 {isLoading ? (
-                  <div className="p-3 text-xs text-slate-400 text-center">Searching rooms...</div>
+                  <div className="p-3 text-xs text-slate-400 text-center">
+                    Searching rooms...
+                  </div>
                 ) : autocompleteRooms.length === 0 ? (
-                  <div className="p-3 text-xs text-slate-400 text-center">No matching rooms found</div>
+                  <div className="p-3 text-xs text-slate-400 text-center">
+                    No matching rooms found
+                  </div>
                 ) : (
                   autocompleteRooms.map((room) => (
                     <button
                       key={room.id}
                       type="button"
                       onClick={() => handleSelectRoom(room.id)}
-                      className="w-full p-2.5 flex flex-col items-start text-left hover:bg-slate-50 transition-colors cursor-pointer"
+                      className="w-full p-2.5 flex flex-col items-start text-left hover:bg-sky-50/50 transition-colors cursor-pointer"
                     >
-                      <p className="text-xs font-semibold text-slate-700 truncate"># {room.name}</p>
-                      <p className="text-[9px] text-slate-400 font-mono truncate">{room.id}</p>
+                      <p className="text-xs font-semibold text-slate-700 truncate">
+                        # {room.name}
+                      </p>
+                      <p className="text-[9px] text-slate-400 font-mono truncate">
+                        {room.id}
+                      </p>
                     </button>
                   ))
                 )}
@@ -291,9 +328,9 @@ export function JoinRoomModal({ isOpen, onClose, onSubmit, isPending }: JoinRoom
             <button
               type="submit"
               disabled={isPending || !query.trim()}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 font-semibold text-white disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 font-semibold text-white disabled:opacity-50 cursor-pointer"
             >
-              {isPending ? "Joining..." : "Join Room"}
+              {isPending ? "Join Room" : "Join Room"}
             </button>
           </div>
         </form>
@@ -322,7 +359,7 @@ export function ConfirmDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
       <div className="bg-white max-w-sm w-full p-6 rounded-2xl border border-slate-200 shadow-xl space-y-4">
         <h3 className="text-lg font-bold text-slate-800">{title}</h3>
         <p className="text-xs text-slate-500">{message}</p>

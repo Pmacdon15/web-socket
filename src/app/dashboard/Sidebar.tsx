@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import { toast } from "sonner";
 import type { FriendRelation, Room } from "@/types/chat";
 
 interface SidebarProps {
@@ -36,21 +37,21 @@ export default function Sidebar({
 }: SidebarProps) {
   const copyUserId = () => {
     navigator.clipboard.writeText(currentUser.id);
-    alert("User ID copied to clipboard!");
+    toast.success("User ID copied to clipboard!");
   };
 
   return (
-    <aside className="w-80 border-r border-slate-200 bg-slate-50 flex flex-col z-10 shrink-0">
+    <aside className="w-80 border-r border-slate-200 bg-white flex flex-col z-10 shrink-0">
       {/* Sidebar Header */}
       <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between">
         <Link
           href="/"
           className="flex items-center gap-2 hover:opacity-85 transition-opacity"
         >
-          <span className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm text-white">
+          <span className="w-6 h-6 rounded-lg bg-sky-500 flex items-center justify-center font-bold text-sm text-white">
             P
           </span>
-          <span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+          <span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-sky-600">
             PatChat
           </span>
         </Link>
@@ -82,7 +83,7 @@ export default function Sidebar({
           </div>
           <button
             onClick={copyUserId}
-            className="text-[10px] px-2 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded font-semibold text-blue-600 hover:text-blue-500 transition-colors"
+            className="text-[10px] px-2 py-1 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded font-semibold text-sky-600 hover:text-sky-500 transition-colors"
           >
             Copy ID
           </button>
@@ -131,8 +132,9 @@ export default function Sidebar({
                   friend.userId === currentUser.id
                     ? friend.friendId
                     : friend.userId;
+                const dmRoomId = `dm-${[currentUser.id, friendId].sort().join("-")}`;
                 const active =
-                  activeChat?.type === "friend" && activeChat.id === friendId;
+                  activeChat?.type === "friend" && activeChat.id === dmRoomId;
                 const isPending = friend.status === "pending";
 
                 return (
@@ -142,13 +144,13 @@ export default function Sidebar({
                     onClick={() =>
                       onSelectChat({
                         type: "friend",
-                        id: friendId,
+                        id: dmRoomId,
                         name: friend.friendName || `User ${friendId.slice(-4)}`,
                       })
                     }
                     className={`w-full flex items-center gap-3 px-2 py-2 rounded-xl text-left transition-all duration-200 ${
                       active
-                        ? "bg-blue-50 border border-blue-100 text-blue-700 font-semibold"
+                        ? "bg-sky-50 border border-sky-100 text-sky-700 font-semibold"
                         : "hover:bg-slate-200/50 border border-transparent text-slate-600 hover:text-slate-900"
                     }`}
                   >
@@ -242,20 +244,22 @@ export default function Sidebar({
             </div>
           </div>
           <div className="space-y-0.5">
-            {rooms.length === 0 ? (
+            {rooms.filter((r) => r.type === "group").length === 0 ? (
               <p className="text-xs text-slate-400 px-2 italic">
                 No rooms joined.
               </p>
             ) : (
-              rooms.map((room) => {
-                const active =
-                  activeChat?.type === "group" && activeChat.id === room.id;
+              rooms
+                .filter((r) => r.type === "group")
+                .map((room) => {
+                  const active =
+                    activeChat?.type === "group" && activeChat.id === room.id;
                 return (
                   <div
                     key={room.id}
                     className={`group/room w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all duration-200 ${
                       active
-                        ? "bg-blue-50 border border-blue-100 text-blue-700 font-semibold"
+                        ? "bg-sky-50 border border-sky-100 text-sky-700 font-semibold"
                         : "hover:bg-slate-200/50 border border-transparent text-slate-600 hover:text-slate-900"
                     }`}
                   >
@@ -271,7 +275,7 @@ export default function Sidebar({
                       className="flex-1 flex items-center gap-3 text-left min-w-0"
                     >
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center border text-xs font-bold ${
-                        active ? "bg-white border-blue-200 text-blue-500" : "bg-slate-100 border-slate-200 text-slate-500"
+                        active ? "bg-white border-sky-200 text-sky-500" : "bg-slate-100 border-slate-200 text-slate-500"
                       }`}>
                         #
                       </div>

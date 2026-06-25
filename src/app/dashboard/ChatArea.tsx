@@ -36,7 +36,7 @@ export default function ChatArea({
   if (!activeChat) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-xl mx-auto gap-6 bg-white">
-        <div className="w-20 h-20 rounded-3xl bg-blue-50 flex items-center justify-center text-blue-500 border border-blue-100 animate-pulse">
+        <div className="w-20 h-20 rounded-3xl bg-sky-50 flex items-center justify-center text-sky-500 border border-sky-100 animate-pulse">
           <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -48,11 +48,11 @@ export default function ChatArea({
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-extrabold text-slate-800 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+          <h2 className="text-2xl font-extrabold text-slate-800 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-sky-600">
             Welcome to PatChat
           </h2>
           <p className="text-sm text-slate-500 leading-relaxed">
-            Real-time chat rooms powered by WebSockets, Neon Database, and Clerk Auth. Choose a room or add a friend to start communicating.
+            Select a room or add a friend to start chatting.
           </p>
         </div>
       </div>
@@ -61,6 +61,9 @@ export default function ChatArea({
 
   // Check direct message permission status
   const isPersonal = activeChat.type === "friend";
+  const friendUserId = isPersonal
+    ? activeChat.id.replace("dm-", "").split("-").find((id) => id !== currentUser.id) || ""
+    : "";
   const isPending = isPersonal && friendRelation?.status === "pending";
   // Determine if we are the sender or receiver of the pending request
   const isSender = isPending && friendRelation?.userId === currentUser.id;
@@ -75,13 +78,13 @@ export default function ChatArea({
             <img
               src={
                 friendRelation?.friendAvatar ||
-                `https://api.dicebear.com/7.x/bottts/svg?seed=${activeChat.id}`
+                `https://api.dicebear.com/7.x/bottts/svg?seed=${friendUserId}`
               }
               alt={activeChat.name}
               className="w-9 h-9 rounded-lg bg-slate-100 border border-slate-200 p-0.5 object-cover"
             />
           ) : (
-            <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200 text-sm font-bold text-blue-500">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200 text-sm font-bold text-sky-500">
               #
             </div>
           )}
@@ -97,7 +100,7 @@ export default function ChatArea({
               Direct Message
             </span>
           ) : (
-            <span className="px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-[10px] font-bold tracking-wide">
+            <span className="px-2 py-0.5 rounded-full bg-sky-50 border border-sky-100 text-sky-700 text-[10px] font-bold tracking-wide">
               Group Room
             </span>
           )}
@@ -122,7 +125,7 @@ export default function ChatArea({
                 </p>
                 <button
                   type="button"
-                  onClick={() => onAcceptFriend(activeChat.id)}
+                  onClick={() => onAcceptFriend(friendUserId)}
                   className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs transition-all shadow-md shadow-amber-500/10 cursor-pointer"
                 >
                   Accept Friend Request
@@ -163,7 +166,7 @@ export default function ChatArea({
                 <div
                   className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                     isSelf
-                      ? "bg-blue-600 text-white rounded-tr-none shadow-sm"
+                      ? "bg-sky-500 text-white rounded-tr-none shadow-sm"
                       : "bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-xs"
                   }`}
                 >
@@ -226,7 +229,7 @@ export default function ChatArea({
           className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 shrink-0 ${
             isPending || !messageInput.trim()
               ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
-              : "bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/10 active:scale-95 cursor-pointer"
+              : "bg-sky-500 hover:bg-sky-400 text-white shadow-md shadow-sky-500/10 active:scale-95 cursor-pointer"
           }`}
         >
           Send
