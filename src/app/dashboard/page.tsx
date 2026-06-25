@@ -67,7 +67,7 @@ export default function Dashboard() {
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const socketRef = useRef<any>(null);
 
-  // Initialize Socket.IO and User Session
+  // Initialize WebSockets and User Session
   useEffect(() => {
     // 1. Initialize user details
     let storedUser = localStorage.getItem("voltchat_user");
@@ -118,14 +118,15 @@ export default function Dashboard() {
       setMessages(JSON.parse(savedMessages));
     }
 
-    // 4. Connect to Socket.IO Server
+    // 4. Connect to WebSocket Server
     const socket = getSocket();
     socketRef.current = socket;
 
     socket.on("connect", () => {
       setSocketConnected(true);
-      // Join global lounge by default
-      socket.emit("join-room", "global-lounge");
+      // Join the current room or global lounge by default
+      const currentRoomId = activeChat ? getRoomId(activeChat) : "global-lounge";
+      socket.emit("join-room", { roomId: currentRoomId });
     });
 
     socket.on("disconnect", () => {
@@ -162,6 +163,8 @@ export default function Dashboard() {
     });
 
     return () => {
+      socket.off("connect");
+      socket.off("disconnect");
       socket.off("message");
       socket.off("user-typing");
     };
@@ -187,11 +190,11 @@ export default function Dashboard() {
   // Join the correct room on room selection change
   const handleSelectChat = (chat: { type: "friend" | "group"; id: string; name: string }) => {
     if (activeChat && socketRef.current) {
-      socketRef.current.emit("leave-room", getRoomId(activeChat));
+      socketRef.current.emit("leave-room", { roomId: getRoomId(activeChat) });
     }
     setActiveChat(chat);
     if (socketRef.current) {
-      socketRef.current.emit("join-room", getRoomId({ type: chat.type, id: chat.id }));
+      socketRef.current.emit("join-room", { roomId: getRoomId({ type: chat.type, id: chat.id }) });
     }
   };
 
@@ -210,9 +213,9 @@ export default function Dashboard() {
       roomId: roomId
     };
 
-    // Emit message to Socket.IO server
+    // Emit message to WebSocket server
     if (socketRef.current && socketConnected) {
-      socketRef.current.emit("send-message", { roomId, message: messagePayload });
+      socketRef.current.emit("send-message", { roomId, ...messagePayload });
     } else {
       // Fallback/offline message append
       setMessages((prev) => {
@@ -269,7 +272,7 @@ export default function Dashboard() {
         "Fascinating perspective. The alignment of human communication with real-time socket events represents standard system cohesion.",
         "System Analysis: CPU and Memory nodes are performing with 99.8% stability under Vercel's Fluid compute.",
         "Deep thought: If serverless functions are ephemeral, does a message truly exist if no client is connected to receive it?",
-        "I am processing your words. Keep in mind: Socket.IO establishes a bi-directional event stream over raw TCP connections."
+        "I am processing your words. Keep in mind: WebSockets establish a bi-directional event stream over TCP connections."
       ];
       botReply = responses[Math.floor(Math.random() * responses.length)];
     } else if (botId === "bot-coder") {
@@ -610,7 +613,7 @@ export default function Dashboard() {
               <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/20 text-xs text-zinc-400 leading-relaxed max-w-2xl mx-auto flex items-start gap-3">
                 <span className="text-violet-400 shrink-0 text-base mt-0.5">ℹ</span>
                 <p>
-                  This chat room uses a Socket.IO connection. If you copy your User ID and paste it in another browser window (or incognito tab), you can chat in real-time between tabs!
+                  This chat room uses a native Vercel WebSocket connection. If you copy your User ID and paste it in another browser window (or incognito tab), you can chat in real-time between tabs!
                 </p>
               </div>
 
@@ -704,7 +707,7 @@ export default function Dashboard() {
                 <li>Open a new browser window in <strong>Incognito Mode</strong> and load this app dashboard.</li>
                 <li>On the new tab, click the <b>Friend Add Icon (+)</b> next to Friends.</li>
                 <li>Paste your original ID, click add, and select the newly added peer.</li>
-                <li>Exchange messages! Watch them transfer in real-time using Socket.IO.</li>
+                <li>Exchange messages! Watch them transfer in real-time using WebSockets.</li>
               </ol>
             </div>
 

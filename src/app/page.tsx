@@ -23,7 +23,7 @@ export default function Home() {
             VoltChat
           </h1>
           <p className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto">
-            Experience real-time messaging powered natively by Vercel Functions and Socket.IO. Open multiple browser tabs to simulate chat participants instantly.
+            Experience real-time messaging powered natively by Vercel Functions and WebSockets. Open multiple browser tabs to simulate chat participants instantly.
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="absolute bottom-4 left-0 right-0 text-center text-xs text-zinc-600 z-10">
-        Built with Next.js 16 & Socket.IO
+        Built with Next.js 16 & Vercel WebSockets
       </footer>
     </div>
   );

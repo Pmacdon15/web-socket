@@ -1,42 +1,133 @@
-import { io, Socket } from "socket.io-client";
+class WebSocketWrapper {
+  private ws: WebSocket | null = null;
+  private listeners: Record<string, Set<Function>> = {};
+  private reconnectDelay = 1000;
+  private url = '';
+  private autoReconnect = true;
+  private sendBuffer: string[] = [];
 
-let socket: Socket | null = null;
+  constructor() {
+    if (typeof window !== 'undefined') {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      this.url = `${protocol}//${window.location.host}/api/ws`;
+      this.connect();
+    }
+  }
 
-export const getSocket = (): Socket => {
-  if (typeof window === "undefined") {
-    // Return a mock object during server-side rendering (SSR)
+  connect() {
+    if (
+      this.ws &&
+      (this.ws.readyState === WebSocket.OPEN ||
+        this.ws.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+
+    try {
+      this.ws = new WebSocket(this.url);
+
+      this.ws.onopen = () => {
+        console.log('✅ WebSocket connected');
+        this.reconnectDelay = 1000;
+        this.trigger('connect');
+
+        while (this.sendBuffer.length > 0) {
+          const msg = this.sendBuffer.shift();
+          if (msg && this.ws) this.ws.send(msg);
+        }
+      };
+
+      this.ws.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          const { type } = payload;
+          if (type) {
+            this.trigger(type, payload);
+          }
+        } catch (err) {
+          console.error('Error parsing message:', err);
+        }
+      };
+
+      this.ws.onclose = () => {
+        console.log('❌ WebSocket disconnected');
+        this.trigger('disconnect');
+        if (this.autoReconnect) {
+          setTimeout(() => this.connect(), this.reconnectDelay);
+          this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000);
+        }
+      };
+
+      this.ws.onerror = (event) => {
+        console.error('⚠️ WebSocket error');
+        this.trigger('connect_error', event);
+      };
+    } catch (e) {
+      console.error('Failed to create WebSocket:', e);
+    }
+  }
+
+  disconnect() {
+    this.autoReconnect = false;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  on(event: string, callback: Function) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = new Set();
+    }
+    this.listeners[event].add(callback);
+  }
+
+  off(event: string, callback?: Function) {
+    if (!callback) {
+      delete this.listeners[event];
+    } else if (this.listeners[event]) {
+      this.listeners[event].delete(callback);
+    }
+  }
+
+  emit(event: string, data: any) {
+    const payload = JSON.stringify({ type: event, ...data });
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(payload);
+    } else {
+      console.log(`⏳ Buffering: ${event}`);
+      this.sendBuffer.push(payload);
+    }
+  }
+
+  private trigger(event: string, ...args: any[]) {
+    if (this.listeners[event]) {
+      for (const cb of this.listeners[event]) {
+        try {
+          cb(...args);
+        } catch (e) {
+          console.error(`Error in ${event} listener:`, e);
+        }
+      }
+    }
+  }
+}
+
+let socket: WebSocketWrapper | null = null;
+
+export const getSocket = (): WebSocketWrapper | any => {
+  if (typeof window === 'undefined') {
     return {
       on: () => {},
       off: () => {},
       emit: () => {},
       connect: () => {},
       disconnect: () => {},
-    } as unknown as Socket;
+    };
   }
 
   if (!socket) {
-    // We connect to the current origin (e.g. localhost:3000 or your Vercel deployment URL)
-    socket = io(window.location.origin, {
-      path: "/api/socket",
-      transports: ["websocket"], // Required for Vercel functions compatibility
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-    });
-
-    socket.on("connect", () => {
-      console.log("Socket.IO client connected with ID:", socket?.id);
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log("Socket.IO client disconnected:", reason);
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("Socket.IO client connection error:", error);
-    });
+    socket = new WebSocketWrapper();
   }
 
   return socket;
