@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import Image from "next/image";
+import Link from "next/link";
 import { toast } from "sonner";
 import type { FriendRelation, Room } from "@/types/chat";
 
@@ -51,7 +51,7 @@ export default function Sidebar({
           <span className="w-6 h-6 rounded-lg bg-sky-500 flex items-center justify-center font-bold text-sm text-white">
             P
           </span>
-          <span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-sky-600">
+          <span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-linear-to-r from-sky-500 to-sky-600">
             PatChat
           </span>
         </Link>
@@ -71,17 +71,18 @@ export default function Sidebar({
       <div className="p-4 border-b border-slate-200 bg-white flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-slate-700 truncate max-w-[130px] block">
+              <span className="text-xs font-bold text-slate-700 truncate max-w-32.5 block">
                 {currentUser.name}
               </span>
-              <span className="text-[10px] font-mono text-slate-400 truncate max-w-[130px] block">
+              <span className="text-[10px] font-mono text-slate-400 truncate max-w-32.5 block">
                 {currentUser.id}
               </span>
             </div>
           </div>
           <button
+            type="button"
             onClick={copyUserId}
             className="text-[10px] px-2 py-1 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded font-semibold text-sky-600 hover:text-sky-500 transition-colors"
           >
@@ -155,7 +156,7 @@ export default function Sidebar({
                     }`}
                   >
                     <div className="relative">
-                      <img
+                      <Image
                         src={
                           friend.friendAvatar ||
                           `https://api.dicebear.com/7.x/bottts/svg?seed=${friendId}`
@@ -254,67 +255,69 @@ export default function Sidebar({
                 .map((room) => {
                   const active =
                     activeChat?.type === "group" && activeChat.id === room.id;
-                return (
-                  <div
-                    key={room.id}
-                    className={`group/room w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all duration-200 ${
-                      active
-                        ? "bg-sky-50 border border-sky-100 text-sky-700 font-semibold"
-                        : "hover:bg-slate-200/50 border border-transparent text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onSelectChat({
-                          type: "group",
-                          id: room.id,
-                          name: room.name,
-                        })
-                      }
-                      className="flex-1 flex items-center gap-3 text-left min-w-0"
+                  return (
+                    <div
+                      key={room.id}
+                      className={`group/room w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all duration-200 ${
+                        active
+                          ? "bg-sky-50 border border-sky-100 text-sky-700 font-semibold"
+                          : "hover:bg-slate-200/50 border border-transparent text-slate-600 hover:text-slate-900"
+                      }`}
                     >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center border text-xs font-bold ${
-                        active ? "bg-white border-sky-200 text-sky-500" : "bg-slate-100 border-slate-200 text-slate-500"
-                      }`}>
-                        #
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm truncate">
-                          {room.name}
-                        </p>
-                        <p className="text-[10px] text-slate-400 font-mono truncate">
-                          {room.id}
-                        </p>
-                      </div>
-                    </button>
-                    {/* Delete button (except global-lounge) */}
-                    {room.id !== "global-lounge" && (
                       <button
                         type="button"
-                        onClick={() => onDeleteRoom(room.id)}
-                        className="opacity-0 group-hover/room:opacity-100 p-1 hover:bg-rose-50 hover:text-rose-600 rounded text-slate-400 transition-all border border-transparent hover:border-rose-100"
-                        title="Leave/Delete Room"
+                        onClick={() =>
+                          onSelectChat({
+                            type: "group",
+                            id: room.id,
+                            name: room.name,
+                          })
+                        }
+                        className="flex-1 flex items-center gap-3 text-left min-w-0"
                       >
-                        <svg
-                          className="w-3.5 h-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center border text-xs font-bold ${
+                            active
+                              ? "bg-white border-sky-200 text-sky-500"
+                              : "bg-slate-100 border-slate-200 text-slate-500"
+                          }`}
                         >
-                          <title>Leave room</title>
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
+                          #
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm truncate">{room.name}</p>
+                          <p className="text-[10px] text-slate-400 font-mono truncate">
+                            {room.id}
+                          </p>
+                        </div>
                       </button>
-                    )}
-                  </div>
-                );
-              })
+                      {/* Delete button (except global-lounge) */}
+                      {room.id !== "global-lounge" && (
+                        <button
+                          type="button"
+                          onClick={() => onDeleteRoom(room.id)}
+                          className="opacity-0 group-hover/room:opacity-100 p-1 hover:bg-rose-50 hover:text-rose-600 rounded text-slate-400 transition-all border border-transparent hover:border-rose-100"
+                          title="Leave/Delete Room"
+                        >
+                          <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <title>Leave room</title>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
             )}
           </div>
         </div>
