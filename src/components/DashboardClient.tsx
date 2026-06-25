@@ -31,11 +31,6 @@ interface DashboardClientProps {
   messagesPromise: Promise<SerializableResult<Message[]>>;
 }
 
-const BOT_AVATARS = [
-  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60",
-  "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=100&auto=format&fit=crop&q=60",
-  "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=100&auto=format&fit=crop&q=60",
-];
 
 export default function DashboardClient({
   roomsPromise,
@@ -108,6 +103,21 @@ export default function DashboardClient({
     };
   }, []);
 
+  // Compute all joined room IDs for notifications
+  const allJoinedRoomIds = React.useMemo(() => {
+    const ids = new Set<string>();
+    // Group rooms
+    rooms.forEach((r) => {
+      ids.add(r.id);
+    });
+    // DM rooms
+    friends.forEach((f) => {
+      const friendId = f.userId === currentUser.id ? f.friendId : f.userId;
+      ids.add(`dm-${[currentUser.id, friendId].sort().join("-")}`);
+    });
+    return Array.from(ids);
+  }, [rooms, friends, currentUser.id]);
+
   // 2. Active room message subscriber & typing handler
   useEffect(() => {
     setWebsocketMessages([]);
@@ -122,6 +132,21 @@ export default function DashboardClient({
           if (prev.some((m) => m.id === msg.id)) return prev;
           return [...prev, msg];
         });
+      } else {
+        // Show toast notification for message received in another room!
+        if (msg.senderId !== currentUser.id) {
+          if (msg.roomId.startsWith("dm-")) {
+            toast.info(`New message from ${msg.senderName}: "${msg.text}"`, {
+              description: "Direct Message",
+            });
+          } else {
+            const room = rooms.find((r) => r.id === msg.roomId);
+            const roomLabel = room ? room.name : `#${msg.roomId}`;
+            toast.info(
+              `New message in ${roomLabel} from ${msg.senderName}: "${msg.text}"`,
+            );
+          }
+        }
       }
     };
 
@@ -129,8 +154,11 @@ export default function DashboardClient({
       userId: string;
       userName: string;
       isTyping: boolean;
+      roomId?: string;
     }) => {
-      if (data.userId === currentUser.id) return;
+      // Only show typing indicator if it is the active room
+      if (data.userId === currentUser.id || data.roomId !== activeRoomId)
+        return;
       setTypingUsers((prev) => {
         if (data.isTyping) {
           if (!prev.includes(data.userName)) return [...prev, data.userName];
@@ -144,15 +172,19 @@ export default function DashboardClient({
     socket.on("message", handleMsg);
     socket.on("user-typing", handleTyping);
 
-    // Join the room
-    socket.emit("join-room", { roomId: activeRoomId });
+    // Join all rooms we are members of so we can receive notifications
+    for (const rid of allJoinedRoomIds) {
+      socket.emit("join-room", { roomId: rid });
+    }
 
     return () => {
       socket.off("message", handleMsg);
       socket.off("user-typing", handleTyping);
-      socket.emit("leave-room", { roomId: activeRoomId });
+      for (const rid of allJoinedRoomIds) {
+        socket.emit("leave-room", { roomId: rid });
+      }
     };
-  }, [activeRoomId, currentUser.id]);
+  }, [activeRoomId, currentUser.id, allJoinedRoomIds, rooms]);
 
   // Combine initial db-fetched messages with real-time websocket ones
   // Deduplicate by message ID to prevent double-renders
@@ -182,12 +214,12 @@ export default function DashboardClient({
       if (!res.success) throw new Error(res.error);
       return res.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Friend request sent!");
       setShowAddFriend(false);
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error(err.message || "Failed to add friend");
     },
   });
@@ -202,7 +234,7 @@ export default function DashboardClient({
       toast.success("Friend request accepted!");
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error(err.message || "Failed to accept request");
     },
   });
@@ -221,7 +253,7 @@ export default function DashboardClient({
       );
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error(err.message || "Failed to create room");
     },
   });
@@ -238,7 +270,7 @@ export default function DashboardClient({
       );
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error(err.message || "Failed to delete room");
     },
   });
@@ -257,7 +289,7 @@ export default function DashboardClient({
       );
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error(
         err.message || "Failed to join room. Verify the Room ID is correct.",
       );
@@ -265,8 +297,14 @@ export default function DashboardClient({
   });
 
   // Action Triggers
-  const handleSelectChat = (chat: { type: "friend" | "group"; id: string; name: string }) => {
-    router.push(`/dashboard?room=${chat.id}&type=${chat.type}&name=${encodeURIComponent(chat.name)}`);
+  const handleSelectChat = (chat: {
+    type: "friend" | "group";
+    id: string;
+    name: string;
+  }) => {
+    router.push(
+      `/dashboard?room=${chat.id}&type=${chat.type}&name=${encodeURIComponent(chat.name)}`,
+    );
     setIsSidebarOpen(false);
   };
 

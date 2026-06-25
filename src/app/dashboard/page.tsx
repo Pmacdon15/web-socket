@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getFriends, getMessages, getRooms, serializeResult } from "@/dal/chat";
-import DashboardClient, { DashboardLoading } from "./DashboardClient";
+import DashboardClient, { DashboardLoading } from "../../components/DashboardClient";
 
 export const dynamic = "force-dynamic";
 

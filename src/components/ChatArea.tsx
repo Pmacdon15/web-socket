@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
-import type { Message, FriendRelation } from "@/types/chat";
+import Image from "next/image";
+import type React from "react";
+import { useEffect, useRef } from "react";
+import type { FriendRelation, Message } from "@/types/chat";
 
 interface ChatAreaProps {
   currentUser: { id: string; name: string; avatar: string };
@@ -30,10 +32,10 @@ export default function ChatArea({
 }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom when messages or typing indicators change
+  // Scroll to bottom when message or typing user counts change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typingUsers]);
+  }, []);
 
   if (!activeChat) {
     return (
@@ -46,8 +48,19 @@ export default function ChatArea({
             className="p-2 -ml-2 rounded-lg text-slate-500 hover:bg-slate-100 cursor-pointer"
             title="Open Menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <title>Logo</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
           <span className="ml-3 font-bold text-slate-800 text-sm">PatChat</span>
@@ -55,7 +68,13 @@ export default function ChatArea({
 
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-xl mx-auto gap-6 bg-white">
           <div className="w-20 h-20 rounded-3xl bg-sky-50 flex items-center justify-center text-sky-500 border border-sky-100 animate-pulse">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-10 h-10"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <title>Welcome illustration</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -66,7 +85,7 @@ export default function ChatArea({
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-2xl font-extrabold text-slate-800 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-sky-600">
+            <h2 className="text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-sky-500 to-sky-600">
               Welcome to PatChat
             </h2>
             <p className="text-sm text-slate-500 leading-relaxed">
@@ -81,7 +100,10 @@ export default function ChatArea({
   // Check direct message permission status
   const isPersonal = activeChat.type === "friend";
   const friendUserId = isPersonal
-    ? activeChat.id.replace("dm-", "").split("-").find((id) => id !== currentUser.id) || ""
+    ? activeChat.id
+        .replace("dm-", "")
+        .split("-")
+        .find((id) => id !== currentUser.id) || ""
     : "";
   const isPending = isPersonal && friendRelation?.status === "pending";
   // Determine if we are the sender or receiver of the pending request
@@ -99,12 +121,25 @@ export default function ChatArea({
             className="p-2 -ml-2 mr-1 rounded-lg text-slate-500 hover:bg-slate-100 md:hidden cursor-pointer"
             title="Open Menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <title>Green dot</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
           {activeChat.type === "friend" ? (
-            <img
+            <Image
+              width={600}
+              height={600}
               src={
                 friendRelation?.friendAvatar ||
                 `https://api.dicebear.com/7.x/bottts/svg?seed=${friendUserId}`
@@ -118,8 +153,12 @@ export default function ChatArea({
             </div>
           )}
           <div>
-            <h3 className="text-sm font-bold text-slate-800">{activeChat.name}</h3>
-            <p className="text-[10px] text-slate-400 font-mono tracking-tight">{activeChat.id}</p>
+            <h3 className="text-sm font-bold text-slate-800">
+              {activeChat.name}
+            </h3>
+            <p className="text-[10px] text-slate-400 font-mono tracking-tight">
+              {activeChat.id}
+            </p>
           </div>
         </div>
 
@@ -142,9 +181,12 @@ export default function ChatArea({
         {!isPending && activeChat.id === "global-lounge" && (
           <div className="max-w-md mx-auto p-5 rounded-2xl border border-sky-100 bg-sky-50/50 text-center space-y-2 mb-6 mt-2 shadow-xs">
             <span className="text-xl block">📢</span>
-            <h4 className="text-xs font-bold text-sky-800 uppercase tracking-wider">Disclaimer</h4>
+            <h4 className="text-xs font-bold text-sky-800 uppercase tracking-wider">
+              Disclaimer
+            </h4>
             <p className="text-xs text-slate-600 leading-relaxed">
-              This chat room is public, but feel free to reach out and chat! This is just a side project I made.
+              This chat room is public, but feel free to reach out and chat!
+              This is just a side project I made.
             </p>
           </div>
         )}
@@ -153,15 +195,19 @@ export default function ChatArea({
         {isPending && (
           <div className="max-w-md mx-auto p-6 rounded-2xl border border-amber-200 bg-amber-50/50 text-center space-y-4 my-8 shadow-sm">
             <span className="text-2xl block">⏳</span>
-            <h4 className="text-sm font-bold text-slate-800">Friend Request Pending</h4>
+            <h4 className="text-sm font-bold text-slate-800">
+              Friend Request Pending
+            </h4>
             {isSender ? (
               <p className="text-xs text-slate-500">
-                You sent a friend request to <b>{activeChat.name}</b>. Messaging will be unlocked once they accept your request.
+                You sent a friend request to <b>{activeChat.name}</b>. Messaging
+                will be unlocked once they accept your request.
               </p>
             ) : isReceiver ? (
               <div className="space-y-3">
                 <p className="text-xs text-slate-500">
-                  <b>{activeChat.name}</b> wants to be friends. Accept their request to unlock messaging.
+                  <b>{activeChat.name}</b> wants to be friends. Accept their
+                  request to unlock messaging.
                 </p>
                 <button
                   type="button"
@@ -178,7 +224,13 @@ export default function ChatArea({
         {/* Message List */}
         {!isPending && messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-slate-400 gap-2">
-            <svg className="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-8 h-8 opacity-50"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <title>No messages image</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -186,7 +238,9 @@ export default function ChatArea({
                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
               />
             </svg>
-            <p className="text-xs text-slate-500">No messages yet. Say hello to start the conversation!</p>
+            <p className="text-xs text-slate-500">
+              No messages yet. Say hello to start the conversation!
+            </p>
           </div>
         ) : (
           !isPending &&
@@ -236,7 +290,8 @@ export default function ChatArea({
               ></span>
             </span>
             <span>
-              {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
+              {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"}{" "}
+              typing...
             </span>
           </div>
         )}
