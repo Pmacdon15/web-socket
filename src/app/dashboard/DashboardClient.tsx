@@ -1,24 +1,29 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { getSocket } from "@/lib/socket";
-import type { Room, FriendRelation, Message } from "@/types/chat";
-import type { SerializableResult } from "@/dal/chat";
-import Sidebar from "./Sidebar";
-import ChatArea from "./ChatArea";
-import { AddFriendModal, CreateRoomModal, JoinRoomModal, ConfirmDialog } from "./Modals";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { use, useEffect, useState } from "react";
 import { Toaster, toast } from "sonner";
 import {
-  actionAddFriend,
   actionAcceptFriend,
+  actionAddFriend,
   actionCreateRoom,
   actionDeleteRoom,
-  actionSaveMessage,
   actionJoinRoom,
-} from "@/app/actions/chat";
+  actionSaveMessage,
+} from "@/actions/chat";
+import type { SerializableResult } from "@/dal/chat";
+import { getSocket } from "@/lib/socket";
+import type { FriendRelation, Message, Room } from "@/types/chat";
+import ChatArea from "./ChatArea";
+import {
+  AddFriendModal,
+  ConfirmDialog,
+  CreateRoomModal,
+  JoinRoomModal,
+} from "./Modals";
+import Sidebar from "./Sidebar";
 
 interface DashboardClientProps {
   roomsPromise: Promise<SerializableResult<Room[]>>;
@@ -52,7 +57,8 @@ export default function DashboardClient({
 
   // Active chat state based on URL Search Parameters
   const activeRoomId = searchParams.get("room") || "global-lounge";
-  const activeRoomType = (searchParams.get("type") as "group" | "friend") || "group";
+  const activeRoomType =
+    (searchParams.get("type") as "group" | "friend") || "group";
   const activeRoomName = searchParams.get("name") || "Global Lounge 🌐";
 
   const activeChat = {
@@ -72,6 +78,7 @@ export default function DashboardClient({
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showJoinRoom, setShowJoinRoom] = useState(false);
   const [deleteRoomId, setDeleteRoomId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const typingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -118,7 +125,11 @@ export default function DashboardClient({
       }
     };
 
-    const handleTyping = (data: { userId: string; userName: string; isTyping: boolean }) => {
+    const handleTyping = (data: {
+      userId: string;
+      userName: string;
+      isTyping: boolean;
+    }) => {
       if (data.userId === currentUser.id) return;
       setTypingUsers((prev) => {
         if (data.isTyping) {
@@ -205,7 +216,9 @@ export default function DashboardClient({
     onSuccess: (room) => {
       toast.success("Room created successfully!");
       setShowCreateRoom(false);
-      router.push(`/dashboard?room=${room.id}&type=group&name=${encodeURIComponent(room.name)}`);
+      router.push(
+        `/dashboard?room=${room.id}&type=group&name=${encodeURIComponent(room.name)}`,
+      );
       router.refresh();
     },
     onError: (err: any) => {
@@ -220,7 +233,9 @@ export default function DashboardClient({
     },
     onSuccess: () => {
       toast.success("Room deleted!");
-      router.push("/dashboard?room=global-lounge&type=group&name=Global Lounge 🌐");
+      router.push(
+        "/dashboard?room=global-lounge&type=group&name=Global Lounge 🌐",
+      );
       router.refresh();
     },
     onError: (err: any) => {
@@ -237,17 +252,22 @@ export default function DashboardClient({
     onSuccess: (room) => {
       toast.success(`Joined room ${room.name}!`);
       setShowJoinRoom(false);
-      router.push(`/dashboard?room=${room.id}&type=group&name=${encodeURIComponent(room.name)}`);
+      router.push(
+        `/dashboard?room=${room.id}&type=group&name=${encodeURIComponent(room.name)}`,
+      );
       router.refresh();
     },
     onError: (err: any) => {
-      toast.error(err.message || "Failed to join room. Verify the Room ID is correct.");
+      toast.error(
+        err.message || "Failed to join room. Verify the Room ID is correct.",
+      );
     },
   });
 
   // Action Triggers
   const handleSelectChat = (chat: { type: "friend" | "group"; id: string; name: string }) => {
     router.push(`/dashboard?room=${chat.id}&type=${chat.type}&name=${encodeURIComponent(chat.name)}`);
+    setIsSidebarOpen(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,7 +298,10 @@ export default function DashboardClient({
     if (!messageInput.trim() || !currentUser.id) return;
 
     const msgId = `MSG-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-    const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const timestamp = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
     const payload: Message = {
       id: msgId,
@@ -297,7 +320,12 @@ export default function DashboardClient({
     setWebsocketMessages((prev) => [...prev, payload]);
 
     // 3. Save to Neon Serverless
-    actionSaveMessage(msgId, activeRoomId, currentUser.name, messageInput.trim()).then((res) => {
+    actionSaveMessage(
+      msgId,
+      activeRoomId,
+      currentUser.name,
+      messageInput.trim(),
+    ).then((res) => {
       if (!res.success) {
         toast.error(res.error || "Failed to save message to database");
       }
@@ -357,7 +385,10 @@ export default function DashboardClient({
         senderId: botId,
         senderName: name,
         text: reply,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
       };
 
       setWebsocketMessages((prev) => [...prev, botPayload]);
@@ -386,6 +417,8 @@ export default function DashboardClient({
         onShowJoinRoom={() => setShowJoinRoom(true)}
         onDeleteRoom={(roomId) => setDeleteRoomId(roomId)}
         socketConnected={socketConnected}
+        isSidebarOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
       <ChatArea
@@ -398,6 +431,7 @@ export default function DashboardClient({
         onSendMessage={handleSendMessage}
         onInputChange={handleInputChange}
         onAcceptFriend={(friendId) => acceptFriendMutation.mutate(friendId)}
+        onOpenSidebar={() => setIsSidebarOpen(true)}
       />
 
       <AddFriendModal

@@ -21,6 +21,8 @@ interface SidebarProps {
   onShowJoinRoom: () => void;
   onDeleteRoom: (roomId: string) => void;
   socketConnected: boolean;
+  isSidebarOpen: boolean;
+  onClose: () => void;
 }
 
 export default function Sidebar({
@@ -34,6 +36,8 @@ export default function Sidebar({
   onShowJoinRoom,
   onDeleteRoom,
   socketConnected,
+  isSidebarOpen,
+  onClose,
 }: SidebarProps) {
   const copyUserId = () => {
     navigator.clipboard.writeText(currentUser.id);
@@ -41,7 +45,22 @@ export default function Sidebar({
   };
 
   return (
-    <aside className="w-80 border-r border-slate-200 bg-white flex flex-col z-10 shrink-0">
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isSidebarOpen && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 md:hidden w-full h-full text-left cursor-default outline-none border-none"
+          aria-label="Close sidebar"
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-80 border-r border-slate-200 bg-white flex flex-col shrink-0 transition-transform duration-300 md:static md:translate-x-0 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
       {/* Sidebar Header */}
       <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between">
         <Link
@@ -157,6 +176,8 @@ export default function Sidebar({
                   >
                     <div className="relative">
                       <Image
+                        width={600}
+                        height={600}
                         src={
                           friend.friendAvatar ||
                           `https://api.dicebear.com/7.x/bottts/svg?seed=${friendId}`
@@ -322,6 +343,7 @@ export default function Sidebar({
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

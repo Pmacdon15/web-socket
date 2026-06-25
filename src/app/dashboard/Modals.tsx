@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import type React from "react";
 import { useState } from "react";
-import { actionSearchRooms, actionSearchUsers } from "@/app/actions/chat";
+import { actionSearchRooms, actionSearchUsers } from "@/actions/chat";
 import type { Room, User } from "@/types/chat";
 
 interface AddFriendModalProps {
@@ -101,6 +101,8 @@ export function AddFriendModal({
                       className="w-full p-2.5 flex items-center gap-3 text-left hover:bg-sky-50/50 transition-colors cursor-pointer"
                     >
                       <Image
+                        width={600}
+                        height={600}
                         src={user.avatar}
                         alt={user.name}
                         className="w-7 h-7 rounded-full bg-slate-100 object-cover"
