@@ -57,3 +57,13 @@ export async function actionSaveMessage(msgId: string, roomId: string, senderNam
   const res = await dal.saveMessage(msgId, roomId, senderName, text);
   return serializeResult(res);
 }
+
+export async function actionSearchUsers(query: string) {
+  const res = await dal.searchUsers(query);
+  return serializeResult(res);
+}
+
+export async function actionSearchRooms(query: string) {
+  const res = await dal.searchRooms(query);
+  return serializeResult(res);
+}

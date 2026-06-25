@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #09090b;
-  --foreground: #f4f4f5;
-  --primary: #8b5cf6;
-  --primary-glow: rgba(139, 92, 246, 0.15);
-  --glass-bg: rgba(20, 20, 25, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --background: #f8fafc; /* Slate 50 */
+  --foreground: #0f172a; /* Slate 900 */
+  --primary: #3b82f6; /* Blue 500 */
+  --primary-glow: rgba(59, 130, 246, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(15, 23, 42, 0.08);
 }
 
 @theme inline {
@@ -24,24 +24,25 @@ body {
   overflow-x: hidden;
 }
 
-/* Glassmorphism Styles */
+/* Glassmorphism Styles (Light Mode) */
 .glass-panel {
   background: var(--glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
 }
 
 .glass-input {
-  background: rgba(10, 10, 12, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.12);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-input:focus {
   border-color: var(--primary);
-  background: rgba(10, 10, 12, 0.8);
-  box-shadow: 0 0 15px var(--primary-glow);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px var(--primary-glow);
   outline: none;
 }
 
@@ -56,12 +57,12 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.1);
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(15, 23, 42, 0.25);
 }
 
 /* Floating Animations */
@@ -82,11 +83,11 @@ body {
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 0.6;
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.08);
   }
   50% {
     opacity: 1;
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
   }
 }
 

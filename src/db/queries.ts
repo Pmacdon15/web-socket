@@ -181,3 +181,27 @@ export async function dbSaveMessage(
   );
   return rows[0] as Message;
 }
+
+export async function dbSearchUsers(query: string, excludeUserId: string): Promise<User[]> {
+  const sql = getSql();
+  const searchPattern = `%${query}%`;
+  const rows = await sql.query(
+    `SELECT id, name, avatar FROM users
+     WHERE id <> $2 AND (id ILIKE $1 OR name ILIKE $1)
+     LIMIT 10`,
+    [searchPattern, excludeUserId]
+  );
+  return rows as User[];
+}
+
+export async function dbSearchRooms(query: string): Promise<Room[]> {
+  const sql = getSql();
+  const searchPattern = `%${query}%`;
+  const rows = await sql.query(
+    `SELECT id, name, type FROM rooms
+     WHERE type = 'group' AND (id ILIKE $1 OR name ILIKE $1)
+     LIMIT 10`,
+    [searchPattern]
+  );
+  return rows as Room[];
+}

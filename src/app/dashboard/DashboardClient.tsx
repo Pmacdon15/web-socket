@@ -9,7 +9,8 @@ import type { Room, FriendRelation, Message } from "@/types/chat";
 import type { SerializableResult } from "@/dal/chat";
 import Sidebar from "./Sidebar";
 import ChatArea from "./ChatArea";
-import { AddFriendModal, CreateRoomModal, JoinRoomModal } from "./Modals";
+import { AddFriendModal, CreateRoomModal, JoinRoomModal, ConfirmDialog } from "./Modals";
+import { Toaster, toast } from "sonner";
 import {
   actionAddFriend,
   actionAcceptFriend,
@@ -70,6 +71,7 @@ export default function DashboardClient({
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showJoinRoom, setShowJoinRoom] = useState(false);
+  const [deleteRoomId, setDeleteRoomId] = useState<string | null>(null);
 
   const typingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -172,12 +174,12 @@ export default function DashboardClient({
       return res.data;
     },
     onSuccess: (data) => {
-      alert("Friend request sent!");
+      toast.success("Friend request sent!");
       setShowAddFriend(false);
       router.refresh();
     },
     onError: (err: any) => {
-      alert(err.message || "Failed to add friend");
+      toast.error(err.message || "Failed to add friend");
     },
   });
 
@@ -188,11 +190,11 @@ export default function DashboardClient({
       return res.data;
     },
     onSuccess: () => {
-      alert("Friend request accepted!");
+      toast.success("Friend request accepted!");
       router.refresh();
     },
     onError: (err: any) => {
-      alert(err.message || "Failed to accept request");
+      toast.error(err.message || "Failed to accept request");
     },
   });
 
@@ -203,13 +205,13 @@ export default function DashboardClient({
       return res.data;
     },
     onSuccess: (room) => {
-      alert("Room created successfully!");
+      toast.success("Room created successfully!");
       setShowCreateRoom(false);
       router.push(`/dashboard?room=${room.id}&type=group&name=${encodeURIComponent(room.name)}`);
       router.refresh();
     },
     onError: (err: any) => {
-      alert(err.message || "Failed to create room");
+      toast.error(err.message || "Failed to create room");
     },
   });
 
@@ -219,12 +221,12 @@ export default function DashboardClient({
       if (!res.success) throw new Error(res.error);
     },
     onSuccess: () => {
-      alert("Room deleted!");
+      toast.success("Room deleted!");
       router.push("/dashboard?room=global-lounge&type=group&name=Global Lounge 🌐");
       router.refresh();
     },
     onError: (err: any) => {
-      alert(err.message || "Failed to delete room");
+      toast.error(err.message || "Failed to delete room");
     },
   });
 
@@ -235,13 +237,13 @@ export default function DashboardClient({
       return res.data;
     },
     onSuccess: (room) => {
-      alert(`Joined room ${room.name}!`);
+      toast.success(`Joined room ${room.name}!`);
       setShowJoinRoom(false);
       router.push(`/dashboard?room=${room.id}&type=group&name=${encodeURIComponent(room.name)}`);
       router.refresh();
     },
     onError: (err: any) => {
-      alert(err.message || "Failed to join room. Verify the Room ID is correct.");
+      toast.error(err.message || "Failed to join room. Verify the Room ID is correct.");
     },
   });
 
@@ -366,10 +368,10 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="flex h-screen bg-zinc-950 text-zinc-100 overflow-hidden font-sans relative">
+    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans relative">
       {/* Decorative Blur Backgrounds */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-violet-600/5 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-fuchsia-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-sky-500/5 rounded-full blur-[100px] pointer-events-none"></div>
 
       <Sidebar
         currentUser={currentUser}
@@ -380,7 +382,7 @@ export default function DashboardClient({
         onShowAddFriend={() => setShowAddFriend(true)}
         onShowCreateRoom={() => setShowCreateRoom(true)}
         onShowJoinRoom={() => setShowJoinRoom(true)}
-        onDeleteRoom={(roomId) => deleteRoomMutation.mutate(roomId)}
+        onDeleteRoom={(roomId) => setDeleteRoomId(roomId)}
         socketConnected={socketConnected}
       />
 
@@ -416,6 +418,22 @@ export default function DashboardClient({
         onSubmit={(roomId) => joinRoomMutation.mutate(roomId)}
         isPending={joinRoomMutation.isPending}
       />
+
+      <ConfirmDialog
+        isOpen={!!deleteRoomId}
+        onClose={() => setDeleteRoomId(null)}
+        onConfirm={() => {
+          if (deleteRoomId) {
+            deleteRoomMutation.mutate(deleteRoomId);
+            setDeleteRoomId(null);
+          }
+        }}
+        title="Leave/Delete Room"
+        message="Are you sure you want to delete this room or remove it from your active list?"
+        isPending={deleteRoomMutation.isPending}
+      />
+
+      <Toaster richColors position="top-right" />
     </div>
   );
 }
@@ -423,11 +441,11 @@ export default function DashboardClient({
 // Inline fallback loader UI for Suspense transitions
 export function DashboardLoading() {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-zinc-950 text-zinc-400">
+    <div className="flex h-screen w-full items-center justify-center bg-slate-50 text-slate-500">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 border-4 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-sm font-semibold tracking-wider uppercase text-zinc-500">
-          Syncing VoltChat session...
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-sm font-semibold tracking-wider uppercase text-slate-400">
+          Syncing PatChat session...
         </p>
       </div>
     </div>

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VoltChat",
+  title: "PatChat",
   description: "Real-time websocket messenger",
 };
 

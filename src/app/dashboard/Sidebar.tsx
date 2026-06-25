@@ -1,8 +1,8 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
-import Image from "next/image";
+import React from "react";
 import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
 import type { FriendRelation, Room } from "@/types/chat";
 
 interface SidebarProps {
@@ -34,24 +34,24 @@ export default function Sidebar({
   onDeleteRoom,
   socketConnected,
 }: SidebarProps) {
-  // const copyUserId = () => {
-  //   navigator.clipboard.writeText(currentUser.id);
-  //   alert("User ID copied to clipboard!");
-  // };
+  const copyUserId = () => {
+    navigator.clipboard.writeText(currentUser.id);
+    alert("User ID copied to clipboard!");
+  };
 
   return (
-    <aside className="w-80 border-r border-zinc-900 bg-zinc-950 flex flex-col z-10 shrink-0">
+    <aside className="w-80 border-r border-slate-200 bg-slate-50 flex flex-col z-10 shrink-0">
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-zinc-900 flex items-center justify-between">
+      <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between">
         <Link
           href="/"
           className="flex items-center gap-2 hover:opacity-85 transition-opacity"
         >
-          <span className="w-6 h-6 rounded-lg bg-violet-600 flex items-center justify-center font-bold text-sm text-white">
-            V
+          <span className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm text-white">
+            P
           </span>
-          <span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-fuchsia-400">
-            VoltChat
+          <span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+            PatChat
           </span>
         </Link>
         <div className="flex items-center gap-1.5">
@@ -60,26 +60,32 @@ export default function Sidebar({
               socketConnected ? "bg-emerald-500 active-glow" : "bg-rose-500"
             }`}
           ></span>
-          <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">
+          <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
             {socketConnected ? "connected" : "offline"}
           </span>
         </div>
       </div>
 
       {/* User Profile Area (Clerk & Copy ID) */}
-      <div className="p-4 border-b border-zinc-900 bg-zinc-900/10 flex flex-col gap-3">
+      <div className="p-4 border-b border-slate-200 bg-white flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <UserButton />
+            <UserButton afterSignOutUrl="/" />
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-zinc-300 truncate max-w-35 block">
+              <span className="text-xs font-bold text-slate-700 truncate max-w-[130px] block">
                 {currentUser.name}
               </span>
-              <span className="text-[10px] font-mono text-zinc-500 truncate max-w-35 block">
+              <span className="text-[10px] font-mono text-slate-400 truncate max-w-[130px] block">
                 {currentUser.id}
               </span>
             </div>
           </div>
+          <button
+            onClick={copyUserId}
+            className="text-[10px] px-2 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded font-semibold text-blue-600 hover:text-blue-500 transition-colors"
+          >
+            Copy ID
+          </button>
         </div>
       </div>
 
@@ -88,13 +94,13 @@ export default function Sidebar({
         {/* Friends Section */}
         <div className="space-y-2">
           <div className="flex items-center justify-between px-2">
-            <span className="text-xs uppercase font-extrabold text-zinc-500 tracking-wider">
+            <span className="text-xs uppercase font-extrabold text-slate-400 tracking-wider">
               Friends
             </span>
             <button
               type="button"
               onClick={onShowAddFriend}
-              className="p-1 rounded hover:bg-zinc-900 text-zinc-400 hover:text-zinc-200 transition-colors"
+              className="p-1 rounded hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors"
               title="Add Friend"
             >
               <svg
@@ -116,7 +122,7 @@ export default function Sidebar({
           </div>
           <div className="space-y-0.5">
             {friends.length === 0 ? (
-              <p className="text-xs text-zinc-600 px-2 italic">
+              <p className="text-xs text-slate-400 px-2 italic">
                 No friends added yet.
               </p>
             ) : (
@@ -142,41 +148,37 @@ export default function Sidebar({
                     }
                     className={`w-full flex items-center gap-3 px-2 py-2 rounded-xl text-left transition-all duration-200 ${
                       active
-                        ? "bg-violet-600/15 border border-violet-500/25 text-violet-300"
-                        : "hover:bg-zinc-900/50 border border-transparent text-zinc-400 hover:text-zinc-200"
+                        ? "bg-blue-50 border border-blue-100 text-blue-700 font-semibold"
+                        : "hover:bg-slate-200/50 border border-transparent text-slate-600 hover:text-slate-900"
                     }`}
                   >
                     <div className="relative">
-                      <Image
+                      <img
                         src={
                           friend.friendAvatar ||
                           `https://api.dicebear.com/7.x/bottts/svg?seed=${friendId}`
                         }
-                        alt={
-                          friend.friendName
-                            ? `${friend.friendName}'s avatar`
-                            : "Friend avatar"
-                        }
-                        className="w-8 h-8 rounded-lg bg-zinc-900 p-0.5 object-cover"
+                        alt={friend.friendName || "Friend Avatar"}
+                        className="w-8 h-8 rounded-lg bg-slate-100 p-0.5 object-cover border border-slate-200/50"
                       />
                       <span
-                        className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-zinc-950 ${
-                          friend.online ? "bg-emerald-500" : "bg-zinc-600"
+                        className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-slate-50 ${
+                          friend.online ? "bg-emerald-500" : "bg-slate-300"
                         }`}
                       ></span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold truncate">
+                        <p className="text-sm truncate">
                           {friend.friendName || `User ${friendId.slice(-4)}`}
                         </p>
                         {isPending && (
-                          <span className="text-[8px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500">
+                          <span className="text-[8px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-600 font-bold">
                             Pending
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-zinc-500 font-mono truncate">
+                      <p className="text-[10px] text-slate-400 font-mono truncate">
                         {friendId}
                       </p>
                     </div>
@@ -190,14 +192,14 @@ export default function Sidebar({
         {/* Groups Section */}
         <div className="space-y-2">
           <div className="flex items-center justify-between px-2">
-            <span className="text-xs uppercase font-extrabold text-zinc-500 tracking-wider">
+            <span className="text-xs uppercase font-extrabold text-slate-400 tracking-wider">
               Chat Rooms
             </span>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={onShowJoinRoom}
-                className="p-1 rounded hover:bg-zinc-900 text-zinc-400 hover:text-zinc-200 transition-colors"
+                className="p-1 rounded hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors"
                 title="Join Existing Room"
               >
                 <svg
@@ -218,7 +220,7 @@ export default function Sidebar({
               <button
                 type="button"
                 onClick={onShowCreateRoom}
-                className="p-1 rounded hover:bg-zinc-900 text-zinc-400 hover:text-zinc-200 transition-colors"
+                className="p-1 rounded hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors"
                 title="Create Room"
               >
                 <svg
@@ -241,8 +243,8 @@ export default function Sidebar({
           </div>
           <div className="space-y-0.5">
             {rooms.length === 0 ? (
-              <p className="text-xs text-zinc-600 px-2 italic">
-                No rooms created.
+              <p className="text-xs text-slate-400 px-2 italic">
+                No rooms joined.
               </p>
             ) : (
               rooms.map((room) => {
@@ -253,8 +255,8 @@ export default function Sidebar({
                     key={room.id}
                     className={`group/room w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all duration-200 ${
                       active
-                        ? "bg-violet-600/15 border border-violet-500/25 text-violet-300"
-                        : "hover:bg-zinc-900/50 border border-transparent text-zinc-400 hover:text-zinc-200"
+                        ? "bg-blue-50 border border-blue-100 text-blue-700 font-semibold"
+                        : "hover:bg-slate-200/50 border border-transparent text-slate-600 hover:text-slate-900"
                     }`}
                   >
                     <button
@@ -268,14 +270,16 @@ export default function Sidebar({
                       }
                       className="flex-1 flex items-center gap-3 text-left min-w-0"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center border border-zinc-800 text-xs font-bold text-violet-400">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center border text-xs font-bold ${
+                        active ? "bg-white border-blue-200 text-blue-500" : "bg-slate-100 border-slate-200 text-slate-500"
+                      }`}>
                         #
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold truncate">
+                        <p className="text-sm truncate">
                           {room.name}
                         </p>
-                        <p className="text-[10px] text-zinc-500 font-mono truncate">
+                        <p className="text-[10px] text-slate-400 font-mono truncate">
                           {room.id}
                         </p>
                       </div>
@@ -284,17 +288,9 @@ export default function Sidebar({
                     {room.id !== "global-lounge" && (
                       <button
                         type="button"
-                        onClick={() => {
-                          if (
-                            confirm(
-                              `Are you sure you want to delete the room "${room.name}"?`,
-                            )
-                          ) {
-                            onDeleteRoom(room.id);
-                          }
-                        }}
-                        className="opacity-0 group-hover/room:opacity-100 p-1 hover:bg-rose-500/10 hover:text-rose-400 rounded text-zinc-500 transition-all"
-                        title="Delete Room"
+                        onClick={() => onDeleteRoom(room.id)}
+                        className="opacity-0 group-hover/room:opacity-100 p-1 hover:bg-rose-50 hover:text-rose-600 rounded text-slate-400 transition-all border border-transparent hover:border-rose-100"
+                        title="Leave/Delete Room"
                       >
                         <svg
                           className="w-3.5 h-3.5"
@@ -302,12 +298,12 @@ export default function Sidebar({
                           stroke="currentColor"
                           viewBox="0 0 24 24"
                         >
-                          <title>Delete room</title>
+                          <title>Leave room</title>
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                           />
                         </svg>
                       </button>

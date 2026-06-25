@@ -191,3 +191,21 @@ export function saveMessage(
     })
   );
 }
+
+export function searchUsers(query: string): ResultAsync<User[], DAlError> {
+  return ResultAsync.fromPromise(
+    auth.protect().then(({ userId }) => db.dbSearchUsers(query, userId)),
+    (error) => ({
+      reason: error instanceof Error ? error.message : "Failed to search users",
+    })
+  );
+}
+
+export function searchRooms(query: string): ResultAsync<Room[], DAlError> {
+  return ResultAsync.fromPromise(
+    auth.protect().then(() => db.dbSearchRooms(query)),
+    (error) => ({
+      reason: error instanceof Error ? error.message : "Failed to search rooms",
+    })
+  );
+}
