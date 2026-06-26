@@ -24,13 +24,17 @@ export async function GET() {
           console.log(`User joined ${roomId}`);
         }
         else if (type === 'leave-room') {
-          if (currentRoom) {
-            rooms.get(currentRoom)?.delete(ws);
-            currentRoom = null;
+          const targetRoom = roomId || currentRoom;
+          if (targetRoom) {
+            rooms.get(targetRoom)?.delete(ws);
+            if (currentRoom === targetRoom) {
+              currentRoom = null;
+            }
           }
         }
         else if (type === 'send-message') {
-          if (currentRoom) {
+          const targetRoom = roomId || currentRoom;
+          if (targetRoom) {
             const payload = {
               type: 'message',
               id,
@@ -38,20 +42,22 @@ export async function GET() {
               senderId,
               senderName,
               timestamp,
-              roomId: currentRoom,
+              roomId: targetRoom,
             };
-            broadcastToRoom(currentRoom, payload);
+            broadcastToRoom(targetRoom, payload);
           }
         }
         else if (type === 'typing') {
-          if (currentRoom) {
+          const targetRoom = roomId || currentRoom;
+          if (targetRoom) {
             const payload = {
               type: 'user-typing',
               userId,
               userName,
               isTyping,
+              roomId: targetRoom,
             };
-            broadcastToRoom(currentRoom, payload, ws);
+            broadcastToRoom(targetRoom, payload, ws);
           }
         }
       } catch (error) {
