@@ -402,10 +402,7 @@ export function ShowQRCodeModal({
 }: ShowQRCodeModalProps) {
   if (!isOpen) return null;
 
-  const friendLink =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/dashboard?addFriend=${userId}`
-      : `https://patchat.vercel.app/dashboard?addFriend=${userId}`;
+  const friendLink = `https://patchat.ca/dashboard?addFriend=${userId}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(friendLink);

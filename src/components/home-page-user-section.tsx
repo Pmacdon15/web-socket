@@ -1,7 +1,11 @@
 import { UserButton } from "@clerk/nextjs";
 import HomeQRCode from "./HomeQRCode";
 
-export default async function HomePageUserSection(userPromise: any) {
+export default async function HomePageUserSection({
+  userPromise,
+}: {
+  userPromise: Promise<any>;
+}) {
   const user = await userPromise;
   return (
     user && (

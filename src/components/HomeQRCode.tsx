@@ -9,9 +9,7 @@ interface HomeQRCodeProps {
 }
 
 export default function HomeQRCode({ userId, userName }: HomeQRCodeProps) {
-  const friendLink = typeof window !== "undefined"
-    ? `${window.location.origin}/dashboard?addFriend=${userId}`
-    : `https://patchat.vercel.app/dashboard?addFriend=${userId}`;
+  const friendLink = `https://patchat.ca/dashboard?addFriend=${userId}`;
 
   const copyFriendLink = () => {
     navigator.clipboard.writeText(friendLink);
