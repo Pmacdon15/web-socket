@@ -23,6 +23,7 @@ interface SidebarProps {
   socketConnected: boolean;
   isSidebarOpen: boolean;
   onClose: () => void;
+  onShowQRCode: () => void;
 }
 
 export default function Sidebar({
@@ -38,6 +39,7 @@ export default function Sidebar({
   socketConnected,
   isSidebarOpen,
   onClose,
+  onShowQRCode,
 }: SidebarProps) {
   const copyUserId = () => {
     navigator.clipboard.writeText(currentUser.id);
@@ -100,13 +102,37 @@ export default function Sidebar({
                 </span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={copyUserId}
-              className="text-[10px] px-2 py-1 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded font-semibold text-sky-600 hover:text-sky-500 transition-colors"
-            >
-              Copy ID
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={onShowQRCode}
+                className="p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
+                title="Show QR Code"
+              >
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <title>QR Code Icon</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v1m-8 7h1m15-4h.01M17 16h.01M4 4h4v4H4V4zm0 12h4v4H4v-4zm12 0h4v4h-4v-4zM16 4h4v4h-4V4z"
+                  />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={copyUserId}
+                className="text-[10px] px-2 py-1 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded font-semibold text-sky-600 hover:text-sky-500 transition-colors"
+              >
+                Copy ID
+              </button>
+            </div>
           </div>
         </div>
 

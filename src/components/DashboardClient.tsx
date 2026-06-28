@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { use, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { actionSaveMessage } from "@/actions/chat";
@@ -16,6 +16,7 @@ import {
   ConfirmDialog,
   CreateRoomModal,
   JoinRoomModal,
+  ShowQRCodeModal,
 } from "./Modals";
 import Sidebar from "./Sidebar";
 
@@ -70,6 +71,7 @@ export default function DashboardClient({
   const [showJoinRoom, setShowJoinRoom] = useState(false);
   const [deleteRoomId, setDeleteRoomId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
 
   const typingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -215,6 +217,53 @@ export default function DashboardClient({
     setShowCreateRoom,
     setShowJoinRoom,
   });
+
+  // Check for auto-adding friend via QR code search param
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const friendId = searchParams.get("addFriend");
+    if (friendId && currentUser.id) {
+      if (friendId === currentUser.id) {
+        toast.error("You cannot add yourself as a friend");
+        const params = new URLSearchParams(window.location.search);
+        params.delete("addFriend");
+        router.replace(`/dashboard?${params.toString()}`);
+        return;
+      }
+
+      const isAlreadyFriend = friends.some(
+        (f) => f.userId === friendId || f.friendId === friendId,
+      );
+
+      if (isAlreadyFriend) {
+        toast.info(
+          "You are already friends or have a pending request with this user",
+        );
+        const params = new URLSearchParams(window.location.search);
+        params.delete("addFriend");
+        router.replace(`/dashboard?${params.toString()}`);
+        return;
+      }
+
+      toast.loading("Sending friend request...", { id: "add-friend-qr" });
+      addFriendMutation.mutate(friendId, {
+        onSuccess: () => {
+          toast.success("Friend added successfully!", { id: "add-friend-qr" });
+          const params = new URLSearchParams(window.location.search);
+          params.delete("addFriend");
+          router.replace(`/dashboard?${params.toString()}`);
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to add friend", {
+            id: "add-friend-qr",
+          });
+          const params = new URLSearchParams(window.location.search);
+          params.delete("addFriend");
+          router.replace(`/dashboard?${params.toString()}`);
+        },
+      });
+    }
+  }, [searchParams, currentUser.id, friends, addFriendMutation, router]);
 
   // Action Triggers
   const handleSelectChat = (chat: {
@@ -377,6 +426,7 @@ export default function DashboardClient({
         socketConnected={socketConnected}
         isSidebarOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        onShowQRCode={() => setShowQRCode(true)}
       />
 
       <ChatArea
@@ -425,6 +475,13 @@ export default function DashboardClient({
         title="Leave/Delete Room"
         message="Are you sure you want to delete this room or remove it from your active list?"
         isPending={deleteRoomMutation.isPending}
+      />
+
+      <ShowQRCodeModal
+        isOpen={showQRCode}
+        onClose={() => setShowQRCode(false)}
+        userId={currentUser.id}
+        userName={currentUser.name}
       />
     </div>
   );
