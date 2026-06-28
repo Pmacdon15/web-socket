@@ -30,11 +30,26 @@ export function useDashboardMutations({
     },
     onSuccess: () => {
       toast.success("Friend request sent!");
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("addFriend")) {
+          params.delete("addFriend");
+          router.replace(`/dashboard?${params.toString()}`);
+          return;
+        }
+      }
       setShowAddFriend(false);
       router.refresh();
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to add friend");
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("addFriend")) {
+          params.delete("addFriend");
+          router.replace(`/dashboard?${params.toString()}`);
+        }
+      }
     },
   });
 

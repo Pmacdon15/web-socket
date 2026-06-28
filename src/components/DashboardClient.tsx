@@ -248,39 +248,10 @@ export default function DashboardClient({
         return;
       }
 
-      toast.loading("Sending friend request...", { id: "add-friend-qr" });
-      addFriendMutation.mutate(friendId, {
-        onSuccess: () => {
-          toast.success("Friend added successfully!", { id: "add-friend-qr" });
-          const params = new URLSearchParams(window.location.search);
-          params.delete("addFriend");
-          router.replace(`/dashboard?${params.toString()}`);
-        },
-        onError: (err) => {
-          toast.error(err.message || "Failed to add friend", {
-            id: "add-friend-qr",
-          });
-          const params = new URLSearchParams(window.location.search);
-          params.delete("addFriend");
-          router.replace(`/dashboard?${params.toString()}`);
-        },
-      });
+      addFriendMutation.mutate(friendId);
     }
   }, [searchParams, currentUser.id, friends, addFriendMutation, router]);
-
-  // Show toast notification for incoming pending friend requests on load/update
-  useEffect(() => {
-    if (!currentUser.id) return;
-    const incomingPending = friends.filter(
-      (f) => f.status === "pending" && f.userId !== currentUser.id,
-    );
-    for (const req of incomingPending) {
-      toast.info(`Pending friend request from ${req.friendName || "User"}`, {
-        description: "Select their chat in the sidebar to accept.",
-        id: `pending-req-${req.userId}`,
-      });
-    }
-  }, [friends, currentUser.id]);
+  
 
   // Action Triggers
   const handleSelectChat = (chat: {
@@ -363,62 +334,9 @@ export default function DashboardClient({
       userName: currentUser.name,
       isTyping: false,
     });
-
-    // 5. Sim bots response if active room is a bot DM
-    if (activeRoomId.startsWith("bot-")) {
-      handleBotResponse(activeRoomId, payload.text);
-    }
   };
 
-  // Bot response simulator
-  const handleBotResponse = (botId: string, userText: string) => {
-    let reply = "";
-    let name = "";
-    if (botId === "bot-echo") {
-      name = "EchoBot 🤖";
-      reply = `ECHO PROTOCOL ACTIVATED: "${userText}"`;
-    } else if (botId === "bot-ai") {
-      name = "AlphaAI 🧠";
-      const options = [
-        "Analyzing packet structures. Standard system cohesion achieved.",
-        "System diagnostics check: Neon DB operations completed in 15ms.",
-        "Deep query: If data is serverless, does a message truly exist if no Client uses use() to resolve it?",
-      ];
-      reply = options[Math.floor(Math.random() * options.length)];
-    } else if (botId === "bot-coder") {
-      name = "NovaCoder 💻";
-      const jokes = [
-        "Why do React hooks prefer dark mode? Because light attracts rendering bugs! 🐛",
-        "There are 10 types of people: those who understand binary, and those who don't. 💾",
-        "A SQL query walks into a bar, walks up to two tables and asks: 'Can I join you?' 📊",
-      ];
-      reply = jokes[Math.floor(Math.random() * jokes.length)];
-    }
-
-    // local typing state
-    setTimeout(() => {
-      setTypingUsers((prev) => (prev.includes(name) ? prev : [...prev, name]));
-    }, 400);
-
-    setTimeout(() => {
-      setTypingUsers((prev) => prev.filter((n) => n !== name));
-      const botMsgId = `MSG-BOT-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-      const botPayload: Message = {
-        id: botMsgId,
-        roomId: activeRoomId,
-        senderId: botId,
-        senderName: name,
-        text: reply,
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-
-      setWebsocketMessages((prev) => [...prev, botPayload]);
-      actionSaveMessage(botMsgId, activeRoomId, name, reply);
-    }, 1500);
-  };
+  
 
   if (!isLoaded || !clerkUser) {
     return <DashboardLoading />;
