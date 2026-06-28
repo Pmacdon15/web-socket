@@ -74,6 +74,7 @@ export default function DashboardClient({
   const [showQRCode, setShowQRCode] = useState(false);
 
   const typingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const triggeredRef = React.useRef<string | null>(null);
 
   // Build the current user structure
   const currentUser = clerkUser
@@ -222,7 +223,9 @@ export default function DashboardClient({
   const searchParams = useSearchParams();
   useEffect(() => {
     const friendId = searchParams.get("addFriend");
-    if (friendId && currentUser.id) {
+    if (friendId && currentUser.id && triggeredRef.current !== friendId) {
+      triggeredRef.current = friendId;
+
       if (friendId === currentUser.id) {
         toast.error("You cannot add yourself as a friend");
         const params = new URLSearchParams(window.location.search);
