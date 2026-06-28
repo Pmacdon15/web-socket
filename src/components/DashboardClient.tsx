@@ -194,7 +194,7 @@ export default function DashboardClient({
         socket.emit("leave-room", { roomId: currentUser.id });
       }
     };
-  }, [activeRoomId, currentUser.id, allJoinedRoomIds, rooms]);
+  }, [activeRoomId, currentUser.id, allJoinedRoomIds, rooms, router.refresh]);
 
   // Combine initial db-fetched messages with real-time websocket ones
   // Deduplicate by message ID to prevent double-renders
