@@ -28,7 +28,10 @@ export async function actionGetMessages(roomId: string) {
   return serializeResult(res);
 }
 
-export async function actionCreateRoom(name: string, type: "group" | "personal") {
+export async function actionCreateRoom(
+  name: string,
+  type: "group" | "personal",
+) {
   const res = await dal.createRoom(name, type);
   return serializeResult(res);
 }
@@ -53,7 +56,12 @@ export async function actionAcceptFriend(friendId: string) {
   return serializeResult(res);
 }
 
-export async function actionSaveMessage(msgId: string, roomId: string, senderName: string, text: string) {
+export async function actionSaveMessage(
+  msgId: string,
+  roomId: string,
+  senderName: string,
+  text: string,
+) {
   const res = await dal.saveMessage(msgId, roomId, senderName, text);
   return serializeResult(res);
 }

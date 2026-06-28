@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { use, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { actionSaveMessage } from "@/actions/chat";
@@ -37,7 +37,7 @@ export default function DashboardClient({
   activeRoomNamePromise,
 }: DashboardClientProps) {
   const { user: clerkUser, isLoaded } = useUser();
-  const router = useRouter();  
+  const router = useRouter();
 
   // Resolve Suspended Server Promises
   const roomsResult = use(roomsPromise);

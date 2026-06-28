@@ -2,13 +2,13 @@ class WebSocketWrapper {
   private ws: WebSocket | null = null;
   private listeners: Record<string, Set<Function>> = {};
   private reconnectDelay = 1000;
-  private url = '';
+  private url = "";
   private autoReconnect = true;
   private sendBuffer: string[] = [];
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    if (typeof window !== "undefined") {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       this.url = `${protocol}//${window.location.host}/api/ws`;
       this.connect();
     }
@@ -27,9 +27,9 @@ class WebSocketWrapper {
       this.ws = new WebSocket(this.url);
 
       this.ws.onopen = () => {
-        console.log('✅ WebSocket connected');
+        console.log("✅ WebSocket connected");
         this.reconnectDelay = 1000;
-        this.trigger('connect');
+        this.trigger("connect");
 
         while (this.sendBuffer.length > 0) {
           const msg = this.sendBuffer.shift();
@@ -45,13 +45,13 @@ class WebSocketWrapper {
             this.trigger(type, payload);
           }
         } catch (err) {
-          console.error('Error parsing message:', err);
+          console.error("Error parsing message:", err);
         }
       };
 
       this.ws.onclose = () => {
-        console.log('❌ WebSocket disconnected');
-        this.trigger('disconnect');
+        console.log("❌ WebSocket disconnected");
+        this.trigger("disconnect");
         if (this.autoReconnect) {
           setTimeout(() => this.connect(), this.reconnectDelay);
           this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000);
@@ -59,11 +59,11 @@ class WebSocketWrapper {
       };
 
       this.ws.onerror = (event) => {
-        console.error('⚠️ WebSocket error');
-        this.trigger('connect_error', event);
+        console.error("⚠️ WebSocket error");
+        this.trigger("connect_error", event);
       };
     } catch (e) {
-      console.error('Failed to create WebSocket:', e);
+      console.error("Failed to create WebSocket:", e);
     }
   }
 
@@ -116,7 +116,7 @@ class WebSocketWrapper {
 let socket: WebSocketWrapper | null = null;
 
 export const getSocket = (): WebSocketWrapper | any => {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return {
       on: () => {},
       off: () => {},

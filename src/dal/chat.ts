@@ -162,12 +162,12 @@ export function addFriend(
           userId,
         );
         await db.dbAddRoomMember(dmRoomId, friendId);
-      } catch (roomErr) {
+      } catch (_roomErr) {
         // Room might already exist, which is fine, but verify they are members
         try {
           await db.dbAddRoomMember(dmRoomId, userId);
           await db.dbAddRoomMember(dmRoomId, friendId);
-        } catch (e) {}
+        } catch (_e) {}
       }
 
       return relation;

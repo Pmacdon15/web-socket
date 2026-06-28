@@ -3,13 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
-   images: {
+  images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**img.clerk.com',
-        port: '',
-        search: '',
+        protocol: "https",
+        hostname: "**img.clerk.com",
+        port: "",
+        search: "",
       },
     ],
   },

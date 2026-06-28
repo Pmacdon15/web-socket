@@ -78,7 +78,6 @@ export function AddFriendModal({
               placeholder="Start typing name or ID..."
               className="w-full glass-input px-4 py-2.5 rounded-xl text-sm outline-none text-slate-800"
               required
-              autoFocus
             />
 
             {/* Autocomplete Dropdown */}
@@ -191,7 +190,6 @@ export function CreateRoomModal({
             placeholder="e.g. Design Team 🎨"
             className="w-full glass-input px-4 py-2.5 rounded-xl text-sm outline-none text-slate-800"
             required
-            autoFocus
           />
           <div className="flex gap-3 justify-end text-xs">
             <button
@@ -283,7 +281,6 @@ export function JoinRoomModal({
               placeholder="Start typing name or ID..."
               className="w-full glass-input px-4 py-2.5 rounded-xl text-sm outline-none text-slate-800"
               required
-              autoFocus
             />
 
             {/* Autocomplete Dropdown */}
