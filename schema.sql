@@ -45,3 +45,26 @@ CREATE TABLE IF NOT EXISTS room_members (
   joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (room_id, user_id)
 );
+
+-- Seed default Global Lounge room
+INSERT INTO rooms (id, name, type, created_by)
+VALUES ('global-lounge', 'Global Lounge 🌐', 'group', NULL)
+ON CONFLICT (id) DO NOTHING;
+
+-- Auto-join trigger: Ensure all new users are added to the Global Lounge automatically
+CREATE OR REPLACE FUNCTION join_global_lounge_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO room_members (room_id, user_id)
+  VALUES ('global-lounge', NEW.id)
+  ON CONFLICT (room_id, user_id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_join_global_lounge ON users;
+CREATE TRIGGER trg_join_global_lounge
+AFTER INSERT ON users
+FOR EACH ROW
+EXECUTE FUNCTION join_global_lounge_trigger();
+
