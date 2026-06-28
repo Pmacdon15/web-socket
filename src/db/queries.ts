@@ -41,7 +41,7 @@ export async function dbGetUser(id: string): Promise<User | null> {
 export async function dbGetRooms(userId: string): Promise<Room[]> {
   "use cache";
   cacheTag(`user-rooms-${userId}`);
-  console.log(`[CACHE-DEBUG] dbGetRooms executed for ${userId}`);
+  console.log(`[CACHE-DEBUG] dbGetRooms (Cache Miss) - Executing DB query for user: ${userId} at ${new Date().toISOString()}`);
   const sql = getSql();
   const rows = await sql.query(
     `SELECT r.id, r.name, r.type, r.created_by as "createdBy", r.created_at as "createdAt"
@@ -128,7 +128,7 @@ export async function dbDeleteRoom(
 export async function dbGetFriends(userId: string): Promise<FriendRelation[]> {
   "use cache";
   cacheTag(`user-friends-${userId}`);
-  console.log(`[CACHE-DEBUG] dbGetFriends executed for ${userId}`);
+  console.log(`[CACHE-DEBUG] dbGetFriends (Cache Miss) - Executing DB query for user: ${userId} at ${new Date().toISOString()}`);
   const sql = getSql();
   const rows = await sql.query(
     `SELECT f.user_id as "userId", f.friend_id as "friendId", f.status, f.created_at as "createdAt",

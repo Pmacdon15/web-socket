@@ -82,30 +82,38 @@ export async function actionJoinRoom(roomId: string) {
 
 export async function actionAddFriend(friendId: string) {
   const { userId } = await auth.protect();
+  console.log(`[CACHE-DEBUG] actionAddFriend started by user: ${userId} adding friend: ${friendId}`);
   const res = await dal.addFriend(friendId);
   res.match(
-    () => {
+    (relation) => {
+      console.log(`[CACHE-DEBUG] actionAddFriend success. Invalidating tags for user: ${userId} and friend: ${friendId} at ${new Date().toISOString()}`, relation);
       updateTag(`user-friends-${userId}`);
       updateTag(`user-friends-${friendId}`);
       updateTag(`user-rooms-${userId}`);
       updateTag(`user-rooms-${friendId}`);
     },
-    () => {},
+    (err) => {
+      console.error(`[CACHE-DEBUG] actionAddFriend failed for user: ${userId}:`, err);
+    },
   );
   return serializeResult(res);
 }
 
 export async function actionAcceptFriend(friendId: string) {
   const { userId } = await auth.protect();
+  console.log(`[CACHE-DEBUG] actionAcceptFriend started by user: ${userId} accepting friend: ${friendId}`);
   const res = await dal.acceptFriend(friendId);
   res.match(
-    () => {
+    (relation) => {
+      console.log(`[CACHE-DEBUG] actionAcceptFriend success. Invalidating tags for user: ${userId} and friend: ${friendId} at ${new Date().toISOString()}`, relation);
       updateTag(`user-friends-${userId}`);
       updateTag(`user-friends-${friendId}`);
       updateTag(`user-rooms-${userId}`);
       updateTag(`user-rooms-${friendId}`);
     },
-    () => {},
+    (err) => {
+      console.error(`[CACHE-DEBUG] actionAcceptFriend failed for user: ${userId}:`, err);
+    },
   );
   return serializeResult(res);
 }

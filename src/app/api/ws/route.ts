@@ -80,7 +80,9 @@ export async function GET() {
             }
           } else if (type === "friend-request") {
             const targetFriendId = message.friendId;
+            console.log(`[WS-SERVER-DEBUG] Received 'friend-request' message. Target user: ${targetFriendId}`);
             if (targetFriendId) {
+              console.log(`[WS-SERVER-DEBUG] Broadcasting 'refetch-data' to room: ${targetFriendId}`);
               broadcastToRoom(targetFriendId, { type: "refetch-data" });
             }
           }

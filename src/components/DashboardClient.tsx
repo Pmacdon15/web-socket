@@ -5,10 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { use, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { actionSaveMessage } from "@/actions/chat";
-import type { SerializableResult } from "@/dal/chat";
 import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 import { getSocket } from "@/lib/socket";
-import type { FriendRelation, Message, Room } from "@/types/chat";
+import type { Message } from "@/types/chat";
+import type { DashboardClientProps } from "@/types/types";
 import ChatArea from "./ChatArea";
 import { DashboardLoading } from "./DashboardLoading";
 import {
@@ -19,15 +19,6 @@ import {
   ShowQRCodeModal,
 } from "./Modals";
 import Sidebar from "./Sidebar";
-
-interface DashboardClientProps {
-  roomsPromise: Promise<SerializableResult<Room[]>>;
-  friendsPromise: Promise<SerializableResult<FriendRelation[]>>;
-  messagesPromise: Promise<SerializableResult<Message[]>>;
-  activeRoomIdPromise: Promise<string>;
-  activeRoomTypePromise: Promise<string>;
-  activeRoomNamePromise: Promise<string>;
-}
 
 export default function DashboardClient({
   roomsPromise,
@@ -51,8 +42,6 @@ export default function DashboardClient({
 
   const rooms = roomsResult.success ? roomsResult.data : [];
   const friends = friendsResult.success ? friendsResult.data : [];
-  console.log("[CLIENT-DEBUG] friends data:", friends);
-  console.log("[CLIENT-DEBUG] rooms data:", rooms);
   const dbMessages = messagesResult.success ? messagesResult.data : [];
 
   const activeChat = {
@@ -126,10 +115,6 @@ export default function DashboardClient({
     const socket = getSocket();
 
     const handleMsg = (msg: Message & { type?: string }) => {
-      if (msg.type === "refetch-data") {
-        console.log("[CLIENT-DEBUG] refetch-data signal received via socket");
-        return;
-      }
       if (msg.roomId === activeRoomId) {
         setWebsocketMessages((prev) => {
           // Deduplicate
@@ -173,14 +158,21 @@ export default function DashboardClient({
       });
     };
 
+    const handleRefetch = (data: unknown) => {
+      console.log("[SOCKET-DEBUG] Received 'refetch-data' event via socket:", data);
+      router.refresh();
+    };
+
     socket.on("message", handleMsg);
     socket.on("user-typing", handleTyping);
+    socket.on("refetch-data", handleRefetch);
 
     return () => {
       socket.off("message", handleMsg);
       socket.off("user-typing", handleTyping);
+      socket.off("refetch-data", handleRefetch);
     };
-  }, [activeRoomId, currentUser.id, rooms]);
+  }, [activeRoomId, currentUser.id, rooms, router]);
 
   // 3. WebSocket room subscription manager
   useEffect(() => {
