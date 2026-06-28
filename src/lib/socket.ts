@@ -1,6 +1,8 @@
+type SocketCallback = (...args: unknown[]) => void;
+
 class WebSocketWrapper {
-  private ws: WebSocket | null = null;
-  private listeners: Record<string, Set<Function>> = {};
+  public ws: WebSocket | null = null;
+  private listeners: Record<string, Set<SocketCallback>> = {};
   private reconnectDelay = 1000;
   private url = "";
   private autoReconnect = true;
@@ -75,22 +77,22 @@ class WebSocketWrapper {
     }
   }
 
-  on(event: string, callback: Function) {
+  on<T>(event: string, callback: (data: T) => void) {
     if (!this.listeners[event]) {
       this.listeners[event] = new Set();
     }
-    this.listeners[event].add(callback);
+    this.listeners[event].add(callback as SocketCallback);
   }
 
-  off(event: string, callback?: Function) {
+  off<T>(event: string, callback?: (data: T) => void) {
     if (!callback) {
       delete this.listeners[event];
     } else if (this.listeners[event]) {
-      this.listeners[event].delete(callback);
+      this.listeners[event].delete(callback as SocketCallback);
     }
   }
 
-  emit(event: string, data: any) {
+  emit(event: string, data?: object) {
     const payload = JSON.stringify({ type: event, ...data });
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(payload);
@@ -100,7 +102,7 @@ class WebSocketWrapper {
     }
   }
 
-  private trigger(event: string, ...args: any[]) {
+  private trigger(event: string, ...args: unknown[]) {
     if (this.listeners[event]) {
       for (const cb of this.listeners[event]) {
         try {
@@ -115,17 +117,7 @@ class WebSocketWrapper {
 
 let socket: WebSocketWrapper | null = null;
 
-export const getSocket = (): WebSocketWrapper | any => {
-  if (typeof window === "undefined") {
-    return {
-      on: () => {},
-      off: () => {},
-      emit: () => {},
-      connect: () => {},
-      disconnect: () => {},
-    };
-  }
-
+export const getSocket = (): WebSocketWrapper => {
   if (!socket) {
     socket = new WebSocketWrapper();
   }

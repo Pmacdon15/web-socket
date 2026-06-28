@@ -33,7 +33,7 @@ export function useDashboardMutations({
       setShowAddFriend(false);
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(err.message || "Failed to add friend");
     },
   });
@@ -48,7 +48,7 @@ export function useDashboardMutations({
       toast.success("Friend request accepted!");
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(err.message || "Failed to accept request");
     },
   });
@@ -67,7 +67,7 @@ export function useDashboardMutations({
       );
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(err.message || "Failed to create room");
     },
   });
@@ -84,7 +84,7 @@ export function useDashboardMutations({
       );
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(err.message || "Failed to delete room");
     },
   });
@@ -103,7 +103,7 @@ export function useDashboardMutations({
       );
       router.refresh();
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(
         err.message || "Failed to join room. Verify the Room ID is correct.",
       );

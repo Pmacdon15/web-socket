@@ -61,6 +61,7 @@ export default function Home() {
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
+                <title>Lightning Bolt Icon</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -87,6 +88,7 @@ export default function Home() {
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
+                <title>Authentication Shield Icon</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -113,6 +115,7 @@ export default function Home() {
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
+                <title>Users Icon</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

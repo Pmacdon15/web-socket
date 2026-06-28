@@ -3,7 +3,11 @@ import {
   type WebSocketData,
 } from "@vercel/functions";
 
-const rooms = new Map<string, Set<any>>();
+interface UpgradedWebSocket {
+  send(data: string): void;
+}
+
+const rooms = new Map<string, Set<UpgradedWebSocket>>();
 
 export async function GET() {
   return experimental_upgradeWebSocket(
@@ -32,12 +36,12 @@ export async function GET() {
             if (!rooms.has(roomId)) {
               rooms.set(roomId, new Set());
             }
-            rooms.get(roomId)?.add(ws);
+            rooms.get(roomId)?.add(ws as unknown as UpgradedWebSocket);
             console.log(`User joined ${roomId}`);
           } else if (type === "leave-room") {
             const targetRoom = roomId || currentRoom;
             if (targetRoom) {
-              rooms.get(targetRoom)?.delete(ws);
+              rooms.get(targetRoom)?.delete(ws as unknown as UpgradedWebSocket);
               if (currentRoom === targetRoom) {
                 currentRoom = null;
               }
@@ -66,7 +70,11 @@ export async function GET() {
                 isTyping,
                 roomId: targetRoom,
               };
-              broadcastToRoom(targetRoom, payload, ws);
+              broadcastToRoom(
+                targetRoom,
+                payload,
+                ws as unknown as UpgradedWebSocket,
+              );
             }
           }
         } catch (error) {
@@ -76,7 +84,7 @@ export async function GET() {
 
       ws.on("close", () => {
         if (currentRoom) {
-          rooms.get(currentRoom)?.delete(ws);
+          rooms.get(currentRoom)?.delete(ws as unknown as UpgradedWebSocket);
         }
       });
 
@@ -90,7 +98,11 @@ export async function GET() {
   );
 }
 
-function broadcastToRoom(roomId: string, message: any, excludeWs?: any) {
+function broadcastToRoom(
+  roomId: string,
+  message: Record<string, unknown>,
+  excludeWs?: UpgradedWebSocket,
+) {
   const room = rooms.get(roomId);
   if (room) {
     const payload = JSON.stringify(message);
