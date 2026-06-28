@@ -1,12 +1,12 @@
 {
-  "name": "web-socket",
-  "version": "0.1.0",
+  "name": "patchat",
+  "version": "3.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check",
+    "lint": "biome check --write --unsafe",
     "format": "biome format --write"
   },
   "dependencies": {

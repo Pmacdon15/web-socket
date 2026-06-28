@@ -1,7 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import type { FriendRelation, Message, Room, User } from "@/types/chat";
 
-const isDbConfigured = () => {
+const _isDbConfigured = () => {
   return typeof process !== "undefined" && !!process.env.DATABASE_URL;
 };
 
@@ -67,7 +67,10 @@ export async function dbCreateRoom(
   return rows[0] as Room;
 }
 
-export async function dbJoinRoom(roomId: string, userId: string): Promise<Room> {
+export async function dbJoinRoom(
+  roomId: string,
+  userId: string,
+): Promise<Room> {
   const sql = getSql();
   await sql.query(
     `INSERT INTO room_members (room_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
@@ -84,7 +87,10 @@ export async function dbJoinRoom(roomId: string, userId: string): Promise<Room> 
   return rows[0] as Room;
 }
 
-export async function dbAddRoomMember(roomId: string, userId: string): Promise<void> {
+export async function dbAddRoomMember(
+  roomId: string,
+  userId: string,
+): Promise<void> {
   const sql = getSql();
   await sql.query(
     `INSERT INTO room_members (room_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
@@ -92,14 +98,23 @@ export async function dbAddRoomMember(roomId: string, userId: string): Promise<v
   );
 }
 
-export async function dbDeleteRoom(roomId: string, userId: string): Promise<void> {
+export async function dbDeleteRoom(
+  roomId: string,
+  userId: string,
+): Promise<void> {
   const sql = getSql();
-  const roomRows = await sql.query(`SELECT created_by FROM rooms WHERE id = $1`, [roomId]);
+  const roomRows = await sql.query(
+    `SELECT created_by FROM rooms WHERE id = $1`,
+    [roomId],
+  );
   const room = roomRows[0];
   if (room && room.created_by === userId) {
     await sql.query(`DELETE FROM rooms WHERE id = $1`, [roomId]);
   } else {
-    await sql.query(`DELETE FROM room_members WHERE room_id = $1 AND user_id = $2`, [roomId, userId]);
+    await sql.query(
+      `DELETE FROM room_members WHERE room_id = $1 AND user_id = $2`,
+      [roomId, userId],
+    );
   }
 }
 
@@ -182,14 +197,17 @@ export async function dbSaveMessage(
   return rows[0] as Message;
 }
 
-export async function dbSearchUsers(query: string, excludeUserId: string): Promise<User[]> {
+export async function dbSearchUsers(
+  query: string,
+  excludeUserId: string,
+): Promise<User[]> {
   const sql = getSql();
   const searchPattern = `%${query}%`;
   const rows = await sql.query(
     `SELECT id, name, avatar FROM users
      WHERE id <> $2 AND (id ILIKE $1 OR name ILIKE $1)
      LIMIT 10`,
-    [searchPattern, excludeUserId]
+    [searchPattern, excludeUserId],
   );
   return rows as User[];
 }
@@ -201,7 +219,7 @@ export async function dbSearchRooms(query: string): Promise<Room[]> {
     `SELECT id, name, type FROM rooms
      WHERE type = 'group' AND (id ILIKE $1 OR name ILIKE $1)
      LIMIT 10`,
-    [searchPattern]
+    [searchPattern],
   );
   return rows as Room[];
 }
