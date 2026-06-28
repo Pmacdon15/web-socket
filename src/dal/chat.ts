@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
-import { okAsync, errAsync, ResultAsync, Result } from "neverthrow";
+import { type Result, ResultAsync } from "neverthrow";
 import * as db from "@/db/queries";
-import type { User, Room, FriendRelation, Message } from "@/types/chat";
+import type { FriendRelation, Message, Room, User } from "@/types/chat";
 
 export type SerializableResult<T> =
   | { success: true; data: T }
@@ -12,7 +12,9 @@ export interface DAlError {
 }
 
 // Maps neverthrow Result into plain serializable structures for boundary crossing
-export function serializeResult<T, E extends DAlError>(result: Result<T, E>): SerializableResult<T> {
+export function serializeResult<T, E extends DAlError>(
+  result: Result<T, E>,
+): SerializableResult<T> {
   if (result.isOk()) {
     return { success: true, data: result.value };
   } else {
@@ -21,12 +23,16 @@ export function serializeResult<T, E extends DAlError>(result: Result<T, E>): Se
 }
 
 // Sync Clerk user profile with the local DB table
-export function syncUserProfile(name: string, avatar: string): ResultAsync<User, DAlError> {
+export function syncUserProfile(
+  name: string,
+  avatar: string,
+): ResultAsync<User, DAlError> {
   return ResultAsync.fromPromise(
     auth.protect().then(({ userId }) => db.dbUpsertUser(userId, name, avatar)),
     (error) => ({
-      reason: error instanceof Error ? error.message : "Failed to sync user profile",
-    })
+      reason:
+        error instanceof Error ? error.message : "Failed to sync user profile",
+    }),
   );
 }
 
@@ -35,8 +41,9 @@ export function getCurrentUserProfile(): ResultAsync<User | null, DAlError> {
   return ResultAsync.fromPromise(
     auth.protect().then(({ userId }) => db.dbGetUser(userId)),
     (error) => ({
-      reason: error instanceof Error ? error.message : "Failed to get user profile",
-    })
+      reason:
+        error instanceof Error ? error.message : "Failed to get user profile",
+    }),
   );
 }
 
@@ -45,8 +52,11 @@ export function getRooms(): ResultAsync<Room[], DAlError> {
   return ResultAsync.fromPromise(
     auth.protect().then(({ userId }) => db.dbGetRooms(userId)),
     (error) => ({
-      reason: error instanceof Error ? error.message : "Failed to retrieve chat rooms",
-    })
+      reason:
+        error instanceof Error
+          ? error.message
+          : "Failed to retrieve chat rooms",
+    }),
   );
 }
 
@@ -55,8 +65,11 @@ export function getFriends(): ResultAsync<FriendRelation[], DAlError> {
   return ResultAsync.fromPromise(
     auth.protect().then(({ userId }) => db.dbGetFriends(userId)),
     (error) => ({
-      reason: error instanceof Error ? error.message : "Failed to retrieve friends directory",
-    })
+      reason:
+        error instanceof Error
+          ? error.message
+          : "Failed to retrieve friends directory",
+    }),
   );
 }
 
@@ -66,13 +79,18 @@ export function getMessages(roomId: string): ResultAsync<Message[], DAlError> {
     auth.protect().then(({ userId }) => {
       // Validate accessibility of DMs: verify user is part of the room ID if type is personal
       if (roomId.startsWith("dm-") && !roomId.includes(userId)) {
-        throw new Error("Unauthorized: Access to this private room is forbidden");
+        throw new Error(
+          "Unauthorized: Access to this private room is forbidden",
+        );
       }
       return db.dbGetMessages(roomId);
     }),
     (error) => ({
-      reason: error instanceof Error ? error.message : `Failed to retrieve messages for room ${roomId}`,
-    })
+      reason:
+        error instanceof Error
+          ? error.message
+          : `Failed to retrieve messages for room ${roomId}`,
+    }),
   );
 }
 
@@ -80,7 +98,7 @@ export function getMessages(roomId: string): ResultAsync<Message[], DAlError> {
 export function createRoom(
   name: string,
   type: "group" | "personal",
-  customId?: string
+  customId?: string,
 ): ResultAsync<Room, DAlError> {
   return ResultAsync.fromPromise(
     auth.protect().then(({ userId }) => {
@@ -92,8 +110,9 @@ export function createRoom(
       return db.dbCreateRoom(roomId, name, type, userId);
     }),
     (error) => ({
-      reason: error instanceof Error ? error.message : "Failed to create chat room",
-    })
+      reason:
+        error instanceof Error ? error.message : "Failed to create chat room",
+    }),
   );
 }
 
@@ -102,8 +121,9 @@ export function deleteRoom(roomId: string): ResultAsync<void, DAlError> {
   return ResultAsync.fromPromise(
     auth.protect().then(({ userId }) => db.dbDeleteRoom(roomId, userId)),
     (error) => ({
-      reason: error instanceof Error ? error.message : "Failed to delete chat room",
-    })
+      reason:
+        error instanceof Error ? error.message : "Failed to delete chat room",
+    }),
   );
 }
 
@@ -112,13 +132,18 @@ export function joinRoom(roomId: string): ResultAsync<Room, DAlError> {
   return ResultAsync.fromPromise(
     auth.protect().then(({ userId }) => db.dbJoinRoom(roomId, userId)),
     (error) => ({
-      reason: error instanceof Error ? error.message : `Failed to join chat room ${roomId}`,
-    })
+      reason:
+        error instanceof Error
+          ? error.message
+          : `Failed to join chat room ${roomId}`,
+    }),
   );
 }
 
 // Send Friend Request
-export function addFriend(friendId: string): ResultAsync<FriendRelation, DAlError> {
+export function addFriend(
+  friendId: string,
+): ResultAsync<FriendRelation, DAlError> {
   return ResultAsync.fromPromise(
     auth.protect().then(async ({ userId }) => {
       if (userId === friendId) {
@@ -130,7 +155,12 @@ export function addFriend(friendId: string): ResultAsync<FriendRelation, DAlErro
       // Also create a personal room for DMs between the two users
       const dmRoomId = `dm-${[userId, friendId].sort().join("-")}`;
       try {
-        await db.dbCreateRoom(dmRoomId, `DM between ${userId} and ${friendId}`, "personal", userId);
+        await db.dbCreateRoom(
+          dmRoomId,
+          `DM between ${userId} and ${friendId}`,
+          "personal",
+          userId,
+        );
         await db.dbAddRoomMember(dmRoomId, friendId);
       } catch (roomErr) {
         // Room might already exist, which is fine, but verify they are members
@@ -143,18 +173,28 @@ export function addFriend(friendId: string): ResultAsync<FriendRelation, DAlErro
       return relation;
     }),
     (error) => ({
-      reason: error instanceof Error ? error.message : "Failed to send friend request",
-    })
+      reason:
+        error instanceof Error
+          ? error.message
+          : "Failed to send friend request",
+    }),
   );
 }
 
 // Accept Friend Request
-export function acceptFriend(friendId: string): ResultAsync<FriendRelation, DAlError> {
+export function acceptFriend(
+  friendId: string,
+): ResultAsync<FriendRelation, DAlError> {
   return ResultAsync.fromPromise(
-    auth.protect().then(({ userId }) => db.dbAcceptFriendRequest(userId, friendId)),
+    auth
+      .protect()
+      .then(({ userId }) => db.dbAcceptFriendRequest(userId, friendId)),
     (error) => ({
-      reason: error instanceof Error ? error.message : "Failed to accept friend request",
-    })
+      reason:
+        error instanceof Error
+          ? error.message
+          : "Failed to accept friend request",
+    }),
   );
 }
 
@@ -163,7 +203,7 @@ export function saveMessage(
   msgId: string,
   roomId: string,
   senderName: string,
-  text: string
+  text: string,
 ): ResultAsync<Message, DAlError> {
   return ResultAsync.fromPromise(
     auth.protect().then(async ({ userId }) => {
@@ -175,11 +215,15 @@ export function saveMessage(
           // Verify relationship status
           const relations = await db.dbGetFriends(userId);
           const rel = relations.find(
-            (r) => (r.userId === id1 && r.friendId === id2) || (r.userId === id2 && r.friendId === id1)
+            (r) =>
+              (r.userId === id1 && r.friendId === id2) ||
+              (r.userId === id2 && r.friendId === id1),
           );
 
           if (!rel || rel.status !== "accepted") {
-            throw new Error("Friend request must be accepted before exchanging messages.");
+            throw new Error(
+              "Friend request must be accepted before exchanging messages.",
+            );
           }
         }
       }
@@ -188,7 +232,7 @@ export function saveMessage(
     }),
     (error) => ({
       reason: error instanceof Error ? error.message : "Failed to post message",
-    })
+    }),
   );
 }
 
@@ -197,7 +241,7 @@ export function searchUsers(query: string): ResultAsync<User[], DAlError> {
     auth.protect().then(({ userId }) => db.dbSearchUsers(query, userId)),
     (error) => ({
       reason: error instanceof Error ? error.message : "Failed to search users",
-    })
+    }),
   );
 }
 
@@ -206,6 +250,6 @@ export function searchRooms(query: string): ResultAsync<Room[], DAlError> {
     auth.protect().then(() => db.dbSearchRooms(query)),
     (error) => ({
       reason: error instanceof Error ? error.message : "Failed to search rooms",
-    })
+    }),
   );
 }
