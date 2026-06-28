@@ -8,6 +8,7 @@ import {
   actionDeleteRoom,
   actionJoinRoom,
 } from "@/actions/chat";
+import { getSocket } from "@/lib/socket";
 
 interface UseDashboardMutationsProps {
   setShowAddFriend: (show: boolean) => void;
@@ -28,8 +29,11 @@ export function useDashboardMutations({
       if (!res.success) throw new Error(res.error);
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, friendId) => {
       toast.success("Friend request sent!");
+      const socket = getSocket();
+      socket.emit("friend-request", { friendId });
+
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
         if (params.has("addFriend")) {
@@ -58,8 +62,10 @@ export function useDashboardMutations({
       if (!res.success) throw new Error(res.error);
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, friendId) => {
       toast.success("Friend request accepted!");
+      const socket = getSocket();
+      socket.emit("friend-request", { friendId });
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to accept request");

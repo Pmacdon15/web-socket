@@ -125,6 +125,10 @@ export default function DashboardClient({
     const socket = getSocket();
 
     const handleMsg = (msg: Message & { type?: string }) => {
+      if (msg.type === "refetch-data") {
+        router.refresh();
+        return;
+      }
       if (msg.roomId === activeRoomId) {
         setWebsocketMessages((prev) => {
           // Deduplicate
@@ -175,12 +179,19 @@ export default function DashboardClient({
     for (const rid of allJoinedRoomIds) {
       socket.emit("join-room", { roomId: rid });
     }
+    // Also join our personal user room to receive direct events (like friend requests)
+    if (currentUser.id) {
+      socket.emit("join-room", { roomId: currentUser.id });
+    }
 
     return () => {
       socket.off("message", handleMsg);
       socket.off("user-typing", handleTyping);
       for (const rid of allJoinedRoomIds) {
         socket.emit("leave-room", { roomId: rid });
+      }
+      if (currentUser.id) {
+        socket.emit("leave-room", { roomId: currentUser.id });
       }
     };
   }, [activeRoomId, currentUser.id, allJoinedRoomIds, rooms]);
