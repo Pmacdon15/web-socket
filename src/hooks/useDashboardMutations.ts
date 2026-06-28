@@ -67,8 +67,7 @@ export function useDashboardMutations({
     onSuccess: (_, friendId) => {
       toast.success("Friend request accepted!");
       const socket = getSocket();
-      socket.emit("friend-request", { friendId });
-      router.refresh();
+      socket.emit("friend-request", { friendId });      
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to accept request");
