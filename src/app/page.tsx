@@ -6,6 +6,7 @@ import ChatSimulator from "@/components/ChatSimulator";
 import HomePageUserSection from "@/components/home-page-user-section";
 import SystemStatus from "@/components/SystemStatus";
 import TechShowcase from "@/components/TechShowcase";
+import { Footer } from "@/components/Footer";
 
 export default async function Home() {
   const userPromise = currentUser();
@@ -152,9 +153,7 @@ export default async function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full text-center text-xs text-slate-400 py-8 relative z-10">
-        Built with Next.js 16, Vercel WebSockets & Neon Serverless DB
-      </footer>
+      <Footer />
     </div>
   );
 }

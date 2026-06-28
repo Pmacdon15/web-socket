@@ -353,7 +353,7 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="flex h-screen bg-background text-slate-900 overflow-hidden font-sans relative">
+    <div className="fixed inset-0 flex bg-background text-slate-900 overflow-hidden font-sans">
       {/* Decorative Blur Backgrounds */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/5 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-sky-500/5 rounded-full blur-[100px] pointer-events-none"></div>

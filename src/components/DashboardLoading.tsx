@@ -1,7 +1,7 @@
 // Inline fallback loader UI for Suspense transitions
 export function DashboardLoading() {
   return (
-    <div className="flex h-screen bg-background text-slate-900 overflow-hidden font-sans relative w-full">
+    <div className="fixed inset-0 flex bg-background text-slate-900 overflow-hidden font-sans w-full">
       {/* Decorative Blur Backgrounds */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-sky-500/5 rounded-full blur-[100px] pointer-events-none" />
