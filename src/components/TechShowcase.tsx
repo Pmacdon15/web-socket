@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function TechShowcase() {
   const code = `// src/app/api/ws/route.ts
 import { experimental_upgradeWebSocket } from "@vercel/functions";
@@ -24,9 +22,10 @@ export async function GET() {
         <h3 className="text-sm font-bold text-slate-800 pb-2 border-b border-slate-100">
           Vercel WebSockets in Next.js
         </h3>
-        
+
         <p className="text-xs text-slate-500 leading-relaxed">
-          Upgrade API routes to real-time serverless WebSocket channels using Vercel Fluid Compute.
+          Upgrade API routes to real-time serverless WebSocket channels using
+          Vercel Fluid Compute.
         </p>
 
         {/* Code Content */}

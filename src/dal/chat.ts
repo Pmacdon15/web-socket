@@ -83,7 +83,7 @@ export function getMessages(roomId: string): ResultAsync<Message[], DAlError> {
           "Unauthorized: Access to this private room is forbidden",
         );
       }
-      return db.dbGetMessages(roomId);
+      return db.dbGetMessages(roomId, userId);
     }),
     (error) => ({
       reason:

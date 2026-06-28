@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface MockMessage {
   id: string;
@@ -63,10 +64,26 @@ const ROOM_MESSAGES: Record<string, MockMessage[]> = {
 };
 
 const RANDOM_CHATTER = [
-  { sender: "SkyWalker ☁️", text: "Just tested the QR code add-friend link, it is so seamless!", avatarSeed: "sky" },
-  { sender: "NovaCoder 💻", text: "Next.js 16 proxy matcher configurations are fully static.", avatarSeed: "coder" },
-  { sender: "EchoBot 🤖", text: "Beep boop! Incoming packets processed in 5ms.", avatarSeed: "echo" },
-  { sender: "AlphaAI 🧠", text: "WebSockets sustain duplex channels over serverless functions.", avatarSeed: "ai" },
+  {
+    sender: "SkyWalker ☁️",
+    text: "Just tested the QR code add-friend link, it is so seamless!",
+    avatarSeed: "sky",
+  },
+  {
+    sender: "NovaCoder 💻",
+    text: "Next.js 16 proxy matcher configurations are fully static.",
+    avatarSeed: "coder",
+  },
+  {
+    sender: "EchoBot 🤖",
+    text: "Beep boop! Incoming packets processed in 5ms.",
+    avatarSeed: "echo",
+  },
+  {
+    sender: "AlphaAI 🧠",
+    text: "WebSockets sustain duplex channels over serverless functions.",
+    avatarSeed: "ai",
+  },
 ];
 
 export default function ChatSimulator() {
@@ -86,7 +103,7 @@ export default function ChatSimulator() {
   // Scroll to bottom of chat simulator
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [simulatorMessages]);
+  }, []);
 
   // Simulate active chat environment (periodically add messages)
   useEffect(() => {
@@ -94,9 +111,13 @@ export default function ChatSimulator() {
       // Don't auto-send messages in AI Bot room
       if (activeRoom === "ai-bot") return;
 
-      const chatter = RANDOM_CHATTER[Math.floor(Math.random() * RANDOM_CHATTER.length)];
+      const chatter =
+        RANDOM_CHATTER[Math.floor(Math.random() * RANDOM_CHATTER.length)];
       const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const timeStr = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 
       // Simulate typing first
       setTypingUser(chatter.sender);
@@ -115,7 +136,6 @@ export default function ChatSimulator() {
           },
         ]);
       }, 1500);
-
     }, 10000);
 
     return () => clearInterval(interval);
@@ -127,7 +147,10 @@ export default function ChatSimulator() {
 
     const userDisplayName = user?.fullName || user?.username || "Guest Tester";
     const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const timeStr = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
     const newMsg: MockMessage = {
       id: `user-${Math.random()}`,
@@ -169,7 +192,8 @@ export default function ChatSimulator() {
               "Agreed. WebSockets eliminate HTTP header overhead on consecutive messaging.",
               "Are you checking your browser logs? The active ws-client frames are visible there.",
             ];
-            botReply = coderReplies[Math.floor(Math.random() * coderReplies.length)];
+            botReply =
+              coderReplies[Math.floor(Math.random() * coderReplies.length)];
           }
 
           setSimulatorMessages((prev) => [
@@ -178,7 +202,10 @@ export default function ChatSimulator() {
               id: `reply-${Math.random()}`,
               sender: botSender,
               text: botReply,
-              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
               avatarSeed: botSeed,
             },
           ]);
@@ -201,7 +228,9 @@ export default function ChatSimulator() {
             type="button"
             onClick={() => setActiveRoom("global-lounge")}
             className={`px-2 py-1 rounded-md transition-colors ${
-              activeRoom === "global-lounge" ? "bg-white text-sky-600 shadow-xs" : "hover:text-slate-700"
+              activeRoom === "global-lounge"
+                ? "bg-white text-sky-600 shadow-xs"
+                : "hover:text-slate-700"
             }`}
           >
             Lounge 🌐
@@ -210,7 +239,9 @@ export default function ChatSimulator() {
             type="button"
             onClick={() => setActiveRoom("dev-chat")}
             className={`px-2 py-1 rounded-md transition-colors ${
-              activeRoom === "dev-chat" ? "bg-white text-sky-600 shadow-xs" : "hover:text-slate-700"
+              activeRoom === "dev-chat"
+                ? "bg-white text-sky-600 shadow-xs"
+                : "hover:text-slate-700"
             }`}
           >
             Dev 💻
@@ -219,7 +250,9 @@ export default function ChatSimulator() {
             type="button"
             onClick={() => setActiveRoom("ai-bot")}
             className={`px-2 py-1 rounded-md transition-colors ${
-              activeRoom === "ai-bot" ? "bg-white text-sky-600 shadow-xs" : "hover:text-slate-700"
+              activeRoom === "ai-bot"
+                ? "bg-white text-sky-600 shadow-xs"
+                : "hover:text-slate-700"
             }`}
           >
             AI Bot 🧠
@@ -230,7 +263,11 @@ export default function ChatSimulator() {
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar py-3 space-y-3 pr-1 text-xs">
         {simulatorMessages.map((msg) => (
-          <div key={msg.id} className="flex items-start gap-2.5 animate-float" style={{ animationIterationCount: 1, animationDuration: "0.2s" }}>
+          <div
+            key={msg.id}
+            className="flex items-start gap-2.5 animate-float"
+            style={{ animationIterationCount: 1, animationDuration: "0.2s" }}
+          >
             {/* biome-ignore lint/performance/noImgElement: using dynamic SVG avatar service */}
             <img
               src={`https://api.dicebear.com/7.x/bottts/svg?seed=${msg.avatarSeed}`}
@@ -240,7 +277,9 @@ export default function ChatSimulator() {
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-1.5">
                 <span className="font-bold text-slate-700">{msg.sender}</span>
-                <span className="text-[9px] text-slate-400 font-mono">{msg.time}</span>
+                <span className="text-[9px] text-slate-400 font-mono">
+                  {msg.time}
+                </span>
               </div>
               <p className="text-slate-600 mt-0.5 leading-relaxed bg-slate-50/50 p-2 rounded-xl border border-slate-100/50 inline-block max-w-full">
                 {msg.text}
@@ -253,8 +292,14 @@ export default function ChatSimulator() {
           <div className="flex items-center gap-2 text-slate-400 italic text-[10px] pl-10">
             <span className="flex gap-1 items-center">
               <span className="w-1 h-1 rounded-full bg-slate-400 animate-bounce"></span>
-              <span className="w-1 h-1 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "0.2s" }}></span>
-              <span className="w-1 h-1 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "0.4s" }}></span>
+              <span
+                className="w-1 h-1 rounded-full bg-slate-400 animate-bounce"
+                style={{ animationDelay: "0.2s" }}
+              ></span>
+              <span
+                className="w-1 h-1 rounded-full bg-slate-400 animate-bounce"
+                style={{ animationDelay: "0.4s" }}
+              ></span>
             </span>
             {typingUser} is typing...
           </div>
@@ -263,7 +308,10 @@ export default function ChatSimulator() {
       </div>
 
       {/* Send Input Form */}
-      <form onSubmit={handleSendMockMessage} className="flex gap-2 pt-3 border-t border-slate-100">
+      <form
+        onSubmit={handleSendMockMessage}
+        className="flex gap-2 pt-3 border-t border-slate-100"
+      >
         <input
           type="text"
           value={mockInput}

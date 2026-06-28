@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { cacheTag } from "next/cache";
 import type { FriendRelation, Message, Room, User } from "@/types/chat";
 
 const _isDbConfigured = () => {
@@ -26,6 +27,8 @@ export async function dbUpsertUser(
 }
 
 export async function dbGetUser(id: string): Promise<User | null> {
+  "use cache";
+  cacheTag(`user-profile-${id}`);
   const sql = getSql();
   const rows = await sql.query(
     `SELECT id, name, avatar, created_at as "createdAt" FROM users WHERE id = $1`,
@@ -36,6 +39,8 @@ export async function dbGetUser(id: string): Promise<User | null> {
 
 // Rooms queries
 export async function dbGetRooms(userId: string): Promise<Room[]> {
+  "use cache";
+  cacheTag(`user-rooms-${userId}`);
   const sql = getSql();
   const rows = await sql.query(
     `SELECT r.id, r.name, r.type, r.created_by as "createdBy", r.created_at as "createdAt"
@@ -120,6 +125,8 @@ export async function dbDeleteRoom(
 
 // Friends queries
 export async function dbGetFriends(userId: string): Promise<FriendRelation[]> {
+  "use cache";
+  cacheTag(`user-friends-${userId}`);
   const sql = getSql();
   const rows = await sql.query(
     `SELECT f.user_id as "userId", f.friend_id as "friendId", f.status, f.created_at as "createdAt",
@@ -166,7 +173,12 @@ export async function dbAcceptFriendRequest(
 }
 
 // Messages queries
-export async function dbGetMessages(roomId: string): Promise<Message[]> {
+export async function dbGetMessages(
+  roomId: string,
+  _userId: string,
+): Promise<Message[]> {
+  "use cache";
+  cacheTag(`messages-${roomId}`);
   const sql = getSql();
   const rows = await sql.query(
     `SELECT id, room_id as "roomId", sender_id as "senderId", sender_name as "senderName", text,

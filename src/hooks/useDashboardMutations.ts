@@ -39,7 +39,6 @@ export function useDashboardMutations({
         }
       }
       setShowAddFriend(false);
-      router.refresh();
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to add friend");
@@ -61,7 +60,6 @@ export function useDashboardMutations({
     },
     onSuccess: () => {
       toast.success("Friend request accepted!");
-      router.refresh();
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to accept request");
@@ -80,7 +78,6 @@ export function useDashboardMutations({
       router.push(
         `/dashboard?room=${room.id}&type=group&name=${encodeURIComponent(room.name)}`,
       );
-      router.refresh();
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to create room");
@@ -97,7 +94,6 @@ export function useDashboardMutations({
       router.push(
         "/dashboard?room=global-lounge&type=group&name=Global Lounge 🌐",
       );
-      router.refresh();
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to delete room");
@@ -116,7 +112,6 @@ export function useDashboardMutations({
       router.push(
         `/dashboard?room=${room.id}&type=group&name=${encodeURIComponent(room.name)}`,
       );
-      router.refresh();
     },
     onError: (err: Error) => {
       toast.error(

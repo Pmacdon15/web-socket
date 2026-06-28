@@ -251,7 +251,6 @@ export default function DashboardClient({
       addFriendMutation.mutate(friendId);
     }
   }, [searchParams, currentUser.id, friends, addFriendMutation, router]);
-  
 
   // Action Triggers
   const handleSelectChat = (chat: {
@@ -335,8 +334,6 @@ export default function DashboardClient({
       isTyping: false,
     });
   };
-
-  
 
   if (!isLoaded || !clerkUser) {
     return <DashboardLoading />;

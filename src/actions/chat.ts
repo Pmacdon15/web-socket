@@ -1,10 +1,16 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
+import { updateTag } from "next/cache";
 import * as dal from "@/dal/chat";
 import { serializeResult } from "@/dal/chat";
 
 export async function actionSyncProfile(name: string, avatar: string) {
+  const { userId } = await auth.protect();
   const res = await dal.syncUserProfile(name, avatar);
+  if (res.isOk()) {
+    updateTag(`user-profile-${userId}`);
+  }
   return serializeResult(res);
 }
 
@@ -32,27 +38,57 @@ export async function actionCreateRoom(
   name: string,
   type: "group" | "personal",
 ) {
+  const { userId } = await auth.protect();
   const res = await dal.createRoom(name, type);
+  if (res.isOk()) {
+    updateTag(`user-rooms-${userId}`);
+    if (type === "personal") {
+      updateTag(`user-rooms-${name}`);
+    }
+  }
   return serializeResult(res);
 }
 
 export async function actionDeleteRoom(roomId: string) {
+  const { userId } = await auth.protect();
   const res = await dal.deleteRoom(roomId);
+  if (res.isOk()) {
+    updateTag(`user-rooms-${userId}`);
+    updateTag(`messages-${roomId}`);
+  }
   return serializeResult(res);
 }
 
 export async function actionJoinRoom(roomId: string) {
+  const { userId } = await auth.protect();
   const res = await dal.joinRoom(roomId);
+  if (res.isOk()) {
+    updateTag(`user-rooms-${userId}`);
+  }
   return serializeResult(res);
 }
 
 export async function actionAddFriend(friendId: string) {
+  const { userId } = await auth.protect();
   const res = await dal.addFriend(friendId);
+  if (res.isOk()) {
+    updateTag(`user-friends-${userId}`);
+    updateTag(`user-friends-${friendId}`);
+    updateTag(`user-rooms-${userId}`);
+    updateTag(`user-rooms-${friendId}`);
+  }
   return serializeResult(res);
 }
 
 export async function actionAcceptFriend(friendId: string) {
+  const { userId } = await auth.protect();
   const res = await dal.acceptFriend(friendId);
+  if (res.isOk()) {
+    updateTag(`user-friends-${userId}`);
+    updateTag(`user-friends-${friendId}`);
+    updateTag(`user-rooms-${userId}`);
+    updateTag(`user-rooms-${friendId}`);
+  }
   return serializeResult(res);
 }
 
@@ -63,6 +99,9 @@ export async function actionSaveMessage(
   text: string,
 ) {
   const res = await dal.saveMessage(msgId, roomId, senderName, text);
+  if (res.isOk()) {
+    updateTag(`messages-${roomId}`);
+  }
   return serializeResult(res);
 }
 
