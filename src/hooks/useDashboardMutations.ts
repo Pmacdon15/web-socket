@@ -39,12 +39,12 @@ export function useDashboardMutations({
         if (params.has("addFriend")) {
           params.delete("addFriend");
           router.replace(`/dashboard?${params.toString()}`);
-          router.refresh();
+          // router.refresh();
           return;
         }
       }
       setShowAddFriend(false);
-      router.refresh();
+      // router.refresh();
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to add friend");
