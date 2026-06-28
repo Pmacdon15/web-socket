@@ -2,10 +2,13 @@ import { Show, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import ChatSimulator from "@/components/ChatSimulator";
 import HomePageUserSection from "@/components/home-page-user-section";
 import SystemStatus from "@/components/SystemStatus";
 import TechShowcase from "@/components/TechShowcase";
+
+const HomeQRCode = dynamic(() => import("@/components/HomeQRCode"), { ssr: false });
 
 export default async function Home() {
   const userPromise = currentUser();

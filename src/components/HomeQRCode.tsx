@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 
@@ -10,13 +9,7 @@ interface HomeQRCodeProps {
 }
 
 export default function HomeQRCode({ userId, userName }: HomeQRCodeProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const friendLink = mounted && typeof window !== "undefined"
+  const friendLink = typeof window !== "undefined"
     ? `${window.location.origin}/dashboard?addFriend=${userId}`
     : `https://patchat.vercel.app/dashboard?addFriend=${userId}`;
 
@@ -43,46 +36,6 @@ export default function HomeQRCode({ userId, userName }: HomeQRCodeProps) {
       copyFriendLink();
     }
   };
-
-  if (!mounted) {
-    return (
-      <div className="flex flex-col items-center gap-3 w-full">
-        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex flex-col items-center shadow-xs w-full max-w-[200px]">
-          <div className="w-[130px] h-[130px] flex items-center justify-center bg-white rounded-lg border border-slate-100/50">
-            <span className="text-[10px] text-slate-400">Loading QR...</span>
-          </div>
-          <span className="text-[9px] text-slate-400 font-mono mt-1.5 select-all truncate max-w-full px-2">
-            {userId}
-          </span>
-        </div>
-
-        <div className="flex gap-2 w-full">
-          <button
-            type="button"
-            disabled
-            className="flex-1 py-2 px-3 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <title>Copy Link Icon</title>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-            </svg>
-            Copy
-          </button>
-          <button
-            type="button"
-            disabled
-            className="flex-1 py-2 px-3 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <title>Share Profile Icon</title>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 10.742l4.744-2.42m0 5.356l-4.744-2.42m4.744-2.42a3 3 0 110-3.684m0 3.684a3 3 0 110 3.684m0-3.684l-4.744 2.42m4.744-2.42a3 3 0 100-3.684M4 12a3 3 0 106 0 3 3 0 00-6 0z" />
-            </svg>
-            Share
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">

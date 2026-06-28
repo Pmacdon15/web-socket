@@ -268,6 +268,20 @@ export default function DashboardClient({
     }
   }, [searchParams, currentUser.id, friends, addFriendMutation, router]);
 
+  // Show toast notification for incoming pending friend requests on load/update
+  useEffect(() => {
+    if (!currentUser.id) return;
+    const incomingPending = friends.filter(
+      (f) => f.status === "pending" && f.userId !== currentUser.id,
+    );
+    for (const req of incomingPending) {
+      toast.info(`Pending friend request from ${req.friendName || "User"}`, {
+        description: "Select their chat in the sidebar to accept.",
+        id: `pending-req-${req.userId}`,
+      });
+    }
+  }, [friends, currentUser.id]);
+
   // Action Triggers
   const handleSelectChat = (chat: {
     type: "friend" | "group";
