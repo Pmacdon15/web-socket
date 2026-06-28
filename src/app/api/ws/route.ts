@@ -2,6 +2,7 @@ import {
   experimental_upgradeWebSocket,
   type WebSocketData,
 } from "@vercel/functions";
+import { connection } from "next/server";
 
 interface UpgradedWebSocket {
   send(data: string): void;
@@ -10,6 +11,7 @@ interface UpgradedWebSocket {
 const rooms = new Map<string, Set<UpgradedWebSocket>>();
 
 export async function GET() {
+  await connection();
   return experimental_upgradeWebSocket(
     (ws) => {
       let currentRoom: string | null = null;

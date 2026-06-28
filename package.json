@@ -1,6 +1,6 @@
 {
-  "name": "web-socket",
-  "version": "0.1.0",
+  "name": "patchat",
+  "version": "3.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
