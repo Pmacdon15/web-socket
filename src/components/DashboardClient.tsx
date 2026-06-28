@@ -51,6 +51,8 @@ export default function DashboardClient({
 
   const rooms = roomsResult.success ? roomsResult.data : [];
   const friends = friendsResult.success ? friendsResult.data : [];
+  console.log("[CLIENT-DEBUG] friends data:", friends);
+  console.log("[CLIENT-DEBUG] rooms data:", rooms);
   const dbMessages = messagesResult.success ? messagesResult.data : [];
 
   const activeChat = {
@@ -102,20 +104,19 @@ export default function DashboardClient({
     };
   }, []);
 
-  // Compute all joined room IDs for notifications
-  const allJoinedRoomIds = React.useMemo(() => {
-    const ids = new Set<string>();
-    // Group rooms
-    rooms.forEach((r) => {
-      ids.add(r.id);
-    });
-    // DM rooms
-    friends.forEach((f) => {
-      const friendId = f.userId === currentUser.id ? f.friendId : f.userId;
-      ids.add(`dm-${[currentUser.id, friendId].sort().join("-")}`);
-    });
-    return Array.from(ids);
-  }, [rooms, friends, currentUser.id]);
+  // Compute all joined room IDs dynamically
+  const ids = new Set<string>();
+  // Group rooms
+  rooms.forEach((r) => {
+    ids.add(r.id);
+  });
+  // DM rooms
+  friends.forEach((f) => {
+    const friendId = f.userId === currentUser.id ? f.friendId : f.userId;
+    ids.add(`dm-${[currentUser.id, friendId].sort().join("-")}`);
+  });
+  const allJoinedRoomIds = Array.from(ids);
+  const allJoinedRoomIdsStr = allJoinedRoomIds.join(",");
 
   // 2. Active room message subscriber & typing handler
   useEffect(() => {
@@ -126,7 +127,7 @@ export default function DashboardClient({
 
     const handleMsg = (msg: Message & { type?: string }) => {
       if (msg.type === "refetch-data") {
-        router.refresh();
+        console.log("[CLIENT-DEBUG] refetch-data signal received via socket");
         return;
       }
       if (msg.roomId === activeRoomId) {
@@ -175,8 +176,19 @@ export default function DashboardClient({
     socket.on("message", handleMsg);
     socket.on("user-typing", handleTyping);
 
+    return () => {
+      socket.off("message", handleMsg);
+      socket.off("user-typing", handleTyping);
+    };
+  }, [activeRoomId, currentUser.id, rooms]);
+
+  // 3. WebSocket room subscription manager
+  useEffect(() => {
+    const socket = getSocket();
+    const roomIds = allJoinedRoomIdsStr.split(",").filter(Boolean);
+
     // Join all rooms we are members of so we can receive notifications
-    for (const rid of allJoinedRoomIds) {
+    for (const rid of roomIds) {
       socket.emit("join-room", { roomId: rid });
     }
     // Also join our personal user room to receive direct events (like friend requests)
@@ -185,16 +197,14 @@ export default function DashboardClient({
     }
 
     return () => {
-      socket.off("message", handleMsg);
-      socket.off("user-typing", handleTyping);
-      for (const rid of allJoinedRoomIds) {
+      for (const rid of roomIds) {
         socket.emit("leave-room", { roomId: rid });
       }
       if (currentUser.id) {
         socket.emit("leave-room", { roomId: currentUser.id });
       }
     };
-  }, [activeRoomId, currentUser.id, allJoinedRoomIds, rooms, router.refresh]);
+  }, [allJoinedRoomIdsStr, currentUser.id]);
 
   // Combine initial db-fetched messages with real-time websocket ones
   // Deduplicate by message ID to prevent double-renders

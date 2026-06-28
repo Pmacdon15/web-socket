@@ -3,7 +3,6 @@ import {
   type WebSocketData,
 } from "@vercel/functions";
 import { connection } from "next/server";
-import { revalidateTag } from "next/cache";
 
 interface UpgradedWebSocket {
   send(data: string): void;
@@ -82,8 +81,6 @@ export async function GET() {
           } else if (type === "friend-request") {
             const targetFriendId = message.friendId;
             if (targetFriendId) {
-              revalidateTag(`user-friends-${targetFriendId}`, "max");
-              revalidateTag(`user-rooms-${targetFriendId}`, "max");
               broadcastToRoom(targetFriendId, { type: "refetch-data" });
             }
           }

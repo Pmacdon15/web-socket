@@ -9,7 +9,9 @@ export async function actionSyncProfile(name: string, avatar: string) {
   const { userId } = await auth.protect();
   const res = await dal.syncUserProfile(name, avatar);
   res.match(
-    () => updateTag(`user-profile-${userId}`),
+    () => {
+      updateTag(`user-profile-${userId}`);
+    },
     () => {},
   );
   return serializeResult(res);
@@ -70,7 +72,9 @@ export async function actionJoinRoom(roomId: string) {
   const { userId } = await auth.protect();
   const res = await dal.joinRoom(roomId);
   res.match(
-    () => updateTag(`user-rooms-${userId}`),
+    () => {
+      updateTag(`user-rooms-${userId}`);
+    },
     () => {},
   );
   return serializeResult(res);
@@ -114,7 +118,9 @@ export async function actionSaveMessage(
 ) {
   const res = await dal.saveMessage(msgId, roomId, senderName, text);
   res.match(
-    () => updateTag(`messages-${roomId}`),
+    () => {
+      updateTag(`messages-${roomId}`);
+    },
     () => {},
   );
   return serializeResult(res);
