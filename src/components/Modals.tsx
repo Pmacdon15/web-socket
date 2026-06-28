@@ -2,8 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { QRCodeSVG } from "qrcode.react";
 import type React from "react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { actionSearchRooms, actionSearchUsers } from "@/actions/chat";
 import type { Room, User } from "@/types/chat";
 
@@ -378,6 +380,145 @@ export function ConfirmDialog({
             className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 font-semibold text-white disabled:opacity-50 cursor-pointer"
           >
             Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface ShowQRCodeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  userId: string;
+  userName: string;
+}
+
+export function ShowQRCodeModal({
+  isOpen,
+  onClose,
+  userId,
+  userName,
+}: ShowQRCodeModalProps) {
+  if (!isOpen) return null;
+
+  const friendLink =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/dashboard?addFriend=${userId}`
+      : `https://patchat.vercel.app/dashboard?addFriend=${userId}`;
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(friendLink);
+    toast.success("Friend link copied to clipboard!");
+  };
+
+  const shareLink = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Add me on PatChat!",
+          text: `Scan my QR code or open this link to add me as a friend on PatChat! My username is ${userName}.`,
+          url: friendLink,
+        });
+        toast.success("Shared successfully!");
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          copyLink();
+        }
+      }
+    } else {
+      copyLink();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div
+        className="bg-white max-w-sm w-full p-6 rounded-2xl border border-slate-200 shadow-xl relative space-y-4 animate-float"
+        style={{ animationIterationCount: 1, animationDuration: "0.3s" }}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer"
+        >
+          ✕
+        </button>
+
+        <div className="text-center space-y-2">
+          <h3 className="text-lg font-bold text-slate-800">
+            Your Friend QR Code
+          </h3>
+          <p className="text-xs text-slate-500">
+            Let other users scan this QR code or use the link below to add you
+            as a friend.
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center justify-center bg-slate-50 p-4 rounded-xl border border-slate-100 relative">
+          <div className="bg-white p-3 rounded-lg shadow-xs">
+            <QRCodeSVG value={friendLink} size={180} includeMargin={true} />
+          </div>
+          <p className="mt-3 text-sm font-semibold text-slate-700">
+            {userName}
+          </p>
+          <p className="text-[10px] text-slate-400 font-mono select-all truncate max-w-full px-4">
+            {userId}
+          </p>
+        </div>
+
+        <div className="space-y-2 pt-2">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={copyLink}
+              className="flex-1 py-2.5 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-600 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <title>Copy Link Icon</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                />
+              </svg>
+              Copy
+            </button>
+            <button
+              type="button"
+              onClick={shareLink}
+              className="flex-1 py-2.5 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active-glow"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <title>Share Profile Icon</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8.684 10.742l4.744-2.42m0 5.356l-4.744-2.42m4.744-2.42a3 3 0 110-3.684m0 3.684a3 3 0 110 3.684m0-3.684l-4.744 2.42m4.744-2.42a3 3 0 100-3.684M4 12a3 3 0 106 0 3 3 0 00-6 0z"
+                />
+              </svg>
+              Share
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Close
           </button>
         </div>
       </div>
