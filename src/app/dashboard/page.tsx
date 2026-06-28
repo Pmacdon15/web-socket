@@ -19,6 +19,15 @@ export default function DashboardPage(props: PageProps<"/dashboard">) {
         roomsPromise={roomsPromise}
         friendsPromise={friendsPromise}
         messagesPromise={messagesPromise}
+        activeRoomIdPromise={props.searchParams.then((p) =>
+          parseParams(p.room),
+        )}
+        activeRoomTypePromise={props.searchParams.then((p) =>
+          parseParams(p.type),
+        )}
+        activeRoomNamePromise={props.searchParams.then((p) =>
+          parseParams(p.type),
+        )}
       />
     </Suspense>
   );

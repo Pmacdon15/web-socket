@@ -3,14 +3,14 @@
 import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { use, useEffect, useState } from "react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { actionSaveMessage } from "@/actions/chat";
-import { useDashboardMutations } from "@/hooks/useDashboardMutations";
-import { DashboardLoading } from "./DashboardLoading";
 import type { SerializableResult } from "@/dal/chat";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 import { getSocket } from "@/lib/socket";
 import type { FriendRelation, Message, Room } from "@/types/chat";
 import ChatArea from "./ChatArea";
+import { DashboardLoading } from "./DashboardLoading";
 import {
   AddFriendModal,
   ConfirmDialog,
@@ -23,32 +23,34 @@ interface DashboardClientProps {
   roomsPromise: Promise<SerializableResult<Room[]>>;
   friendsPromise: Promise<SerializableResult<FriendRelation[]>>;
   messagesPromise: Promise<SerializableResult<Message[]>>;
+  activeRoomIdPromise: Promise<string>;
+  activeRoomTypePromise: Promise<string>;
+  activeRoomNamePromise: Promise<string>;
 }
-
 
 export default function DashboardClient({
   roomsPromise,
   friendsPromise,
   messagesPromise,
+  activeRoomIdPromise,
+  activeRoomTypePromise,
+  activeRoomNamePromise,
 }: DashboardClientProps) {
   const { user: clerkUser, isLoaded } = useUser();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const router = useRouter();  
 
   // Resolve Suspended Server Promises
   const roomsResult = use(roomsPromise);
   const friendsResult = use(friendsPromise);
   const messagesResult = use(messagesPromise);
+  const activeRoomId = use(activeRoomIdPromise) || "global-lounge";
+  const activeRoomType =
+    (use(activeRoomTypePromise) as "group" | "friend") || "group";
+  const activeRoomName = use(activeRoomNamePromise) || "Global Lounge 🌐";
 
   const rooms = roomsResult.success ? roomsResult.data : [];
   const friends = friendsResult.success ? friendsResult.data : [];
   const dbMessages = messagesResult.success ? messagesResult.data : [];
-
-  // Active chat state based on URL Search Parameters
-  const activeRoomId = searchParams.get("room") || "global-lounge";
-  const activeRoomType =
-    (searchParams.get("type") as "group" | "friend") || "group";
-  const activeRoomName = searchParams.get("name") || "Global Lounge 🌐";
 
   const activeChat = {
     id: activeRoomId,
@@ -424,9 +426,6 @@ export default function DashboardClient({
         message="Are you sure you want to delete this room or remove it from your active list?"
         isPending={deleteRoomMutation.isPending}
       />
-
-      
     </div>
   );
 }
-
