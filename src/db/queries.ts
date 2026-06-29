@@ -2,11 +2,8 @@ import { neon } from "@neondatabase/serverless";
 import { cacheTag } from "next/cache";
 import type { FriendRelation, Message, Room, User } from "@/types/chat";
 
-const _isDbConfigured = () => {
-  return typeof process !== "undefined" && !!process.env.DATABASE_URL;
-};
 
-const getSql = () => {
+export const getSql = () => {
   return neon(process.env.DATABASE_URL || "");
 };
 
